@@ -47,4 +47,4 @@ RUN ${PIP} install --trusted-host pypi.python.org -r gpu_requirements.txt
 
 RUN ${PIP} install --upgrade pycocotools
 
-RUN bash ./lib/build.sh
+RUN cd /lib/ && ./build.sh
