@@ -16,7 +16,7 @@ from torch.autograd import Variable
 from torchvision import datasets, models, transforms
 import torchvision
 
-import model
+import new_model
 from anchors import Anchors
 import losses
 from dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer
@@ -34,8 +34,8 @@ def main(args=None):
 
 	parser     = argparse.ArgumentParser(description='Simple training script for training a RetinaNet network.')
 
-	parser.add_argument('--dataset', help='Dataset type, must be one of csv or coco.')
-	parser.add_argument('--coco_path', help='Path to COCO directory')
+	parser.add_argument('--dataset', help='Dataset type, must be one of csv or coco.', default='coco')
+	parser.add_argument('--coco_path', help='Path to COCO directory', default='./data')
 	parser.add_argument('--csv_train', help='Path to file containing training annotations (see readme)')
 	parser.add_argument('--csv_classes', help='Path to file containing class list (see readme)')
 	parser.add_argument('--csv_val', help='Path to file containing validation annotations (optional, see readme)')
@@ -173,7 +173,8 @@ def main(args=None):
 
 	retinanet.eval()
 
-	torch.save(retinanet, 'model_final.pt'.format(epoch_num))
+	torch.save(retinanet.state_dict(), 
+                os.path.join('saved_models', 'model_final_{}.pt'.format(epoch_num)))
 
 if __name__ == '__main__':
  main()
