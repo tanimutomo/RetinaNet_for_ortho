@@ -41,7 +41,7 @@ def main(args=None):
 	parser.add_argument('--csv_val', help='Path to file containing validation annotations (optional, see readme)')
 
 	parser.add_argument('--depth', help='Resnet depth, must be one of 18, 34, 50, 101, 152', type=int, default=50)
-	parser.add_argument('--epochs', help='Number of epochs', type=int, default=100)
+	parser.add_argument('--epochs', help='Number of epochs', type=int, default=1)
 
 	parser = parser.parse_args(args)
 
@@ -83,15 +83,15 @@ def main(args=None):
 
 	# Create the model
 	if parser.depth == 18:
-		retinanet = model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
+		retinanet = new_model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
 	elif parser.depth == 34:
-		retinanet = model.resnet34(num_classes=dataset_train.num_classes(), pretrained=True)
+		retinanet = new_model.resnet34(num_classes=dataset_train.num_classes(), pretrained=True)
 	elif parser.depth == 50:
-		retinanet = model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
+		retinanet = new_model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
 	elif parser.depth == 101:
-		retinanet = model.resnet101(num_classes=dataset_train.num_classes(), pretrained=True)
+		retinanet = new_model.resnet101(num_classes=dataset_train.num_classes(), pretrained=True)
 	elif parser.depth == 152:
-		retinanet = model.resnet152(num_classes=dataset_train.num_classes(), pretrained=True)
+		retinanet = new_model.resnet152(num_classes=dataset_train.num_classes(), pretrained=True)
 	else:
 		raise ValueError('Unsupported model depth, must be one of 18, 34, 50, 101, 152')		
 
