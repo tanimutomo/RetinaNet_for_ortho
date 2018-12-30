@@ -150,9 +150,9 @@ def main(args=None):
 				
 				del classification_loss
 				del regression_loss
-			except Exception as e:
-				print(e)
-				continue
+			# except Exception as e:
+			# 	print(e)
+			# 	continue
 
             if parser.dataset == 'coco':
 
