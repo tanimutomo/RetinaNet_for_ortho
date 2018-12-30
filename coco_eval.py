@@ -12,6 +12,7 @@ import torch
 def evaluate_coco(dataset, model, threshold=0.05):
     
     model.eval()
+    model.cuda()
     
     with torch.no_grad():
 
