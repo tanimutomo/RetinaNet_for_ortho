@@ -115,43 +115,44 @@ def main(args=None):
 
 	print('Num training images: {}'.format(len(dataset_train)))
 
-	for epoch_num in range(parser.epochs):
+    for epoch_num in range(parser.epochs):
 
-		retinanet.train()
-		retinanet.module.freeze_bn()
-		
-		epoch_loss = []
-		
-		for iter_num, data in enumerate(dataloader_train):
-            optimizer.zero_grad()
+        retinanet.train()
+        retinanet.module.freeze_bn()
 
-            classification_loss, regression_loss = retinanet([data['img'].cuda().float(), data['annot']])
+        epoch_loss = []
 
-            classification_loss = classification_loss.mean()
-            regression_loss = regression_loss.mean()
+        for iter_num, data in enumerate(dataloader_train):
+            try:
+                optimizer.zero_grad()
 
-            loss = classification_loss + regression_loss
-            
-            # if bool(loss == 0):
-            #     continue
+                classification_loss, regression_loss = retinanet([data['img'].cuda().float(), data['annot']])
 
-            loss.backward()
+                classification_loss = classification_loss.mean()
+                regression_loss = regression_loss.mean()
 
-            torch.nn.utils.clip_grad_norm_(retinanet.parameters(), 0.1)
+                loss = classification_loss + regression_loss
+                
+                if bool(loss == 0):
+                    continue
 
-            optimizer.step()
+                loss.backward()
 
-            loss_hist.append(float(loss))
+                torch.nn.utils.clip_grad_norm_(retinanet.parameters(), 0.1)
 
-            epoch_loss.append(float(loss))
+                optimizer.step()
 
-            print('Epoch: {} | Iteration: {} | Classification loss: {:1.5f} | Regression loss: {:1.5f} | Running loss: {:1.5f}'.format(epoch_num, iter_num, float(classification_loss), float(regression_loss), np.mean(loss_hist)))
-            
-            del classification_loss
-            del regression_loss
-			# except Exception as e:
-			# 	print(e)
-			# 	continue
+                loss_hist.append(float(loss))
+
+                epoch_loss.append(float(loss))
+
+                print('Epoch: {} | Iteration: {} | Classification loss: {:1.5f} | Regression loss: {:1.5f} | Running loss: {:1.5f}'.format(epoch_num, iter_num, float(classification_loss), float(regression_loss), np.mean(loss_hist)))
+                
+                del classification_loss
+                del regression_loss
+            except Exception as e:
+                print(e)
+                continue
 
             if parser.dataset == 'coco':
 
