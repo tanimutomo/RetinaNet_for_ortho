@@ -123,7 +123,6 @@ def main(args=None):
 		epoch_loss = []
 		
 		for iter_num, data in enumerate(dataloader_train):
-			# try:
             optimizer.zero_grad()
 
             classification_loss, regression_loss = retinanet([data['img'].cuda().float(), data['annot']])
