@@ -123,36 +123,36 @@ def main(args=None):
 		epoch_loss = []
 		
 		for iter_num, data in enumerate(dataloader_train):
-			try:
-				optimizer.zero_grad()
+			# try:
+            optimizer.zero_grad()
 
-				classification_loss, regression_loss = retinanet([data['img'].cuda().float(), data['annot']])
+            classification_loss, regression_loss = retinanet([data['img'].cuda().float(), data['annot']])
 
-				classification_loss = classification_loss.mean()
-				regression_loss = regression_loss.mean()
+            classification_loss = classification_loss.mean()
+            regression_loss = regression_loss.mean()
 
-				loss = classification_loss + regression_loss
-				
-				if bool(loss == 0):
-					continue
+            loss = classification_loss + regression_loss
+            
+            if bool(loss == 0):
+                continue
 
-				loss.backward()
+            loss.backward()
 
-				torch.nn.utils.clip_grad_norm_(retinanet.parameters(), 0.1)
+            torch.nn.utils.clip_grad_norm_(retinanet.parameters(), 0.1)
 
-				optimizer.step()
+            optimizer.step()
 
-				loss_hist.append(float(loss))
+            loss_hist.append(float(loss))
 
-				epoch_loss.append(float(loss))
+            epoch_loss.append(float(loss))
 
-				print('Epoch: {} | Iteration: {} | Classification loss: {:1.5f} | Regression loss: {:1.5f} | Running loss: {:1.5f}'.format(epoch_num, iter_num, float(classification_loss), float(regression_loss), np.mean(loss_hist)))
-				
-				del classification_loss
-				del regression_loss
-			except Exception as e:
-				print(e)
-				continue
+            print('Epoch: {} | Iteration: {} | Classification loss: {:1.5f} | Regression loss: {:1.5f} | Running loss: {:1.5f}'.format(epoch_num, iter_num, float(classification_loss), float(regression_loss), np.mean(loss_hist)))
+            
+            del classification_loss
+            del regression_loss
+			# except Exception as e:
+			# 	print(e)
+			# 	continue
 
             if parser.dataset == 'coco':
 
@@ -167,7 +167,7 @@ def main(args=None):
                 mAP = csv_eval.evaluate(dataset_val, retinanet)
 
             
-        scheduler.step(np.mean(epoch_loss))	
+            scheduler.step(np.mean(epoch_loss))	
 
 		torch.save(retinanet.module, '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
 
