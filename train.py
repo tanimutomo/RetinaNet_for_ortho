@@ -150,9 +150,9 @@ def main(args=None):
 				
 				del classification_loss
 				del regression_loss
-			# except Exception as e:
-			# 	print(e)
-			# 	continue
+			except Exception as e:
+				print(e)
+				continue
 
             if parser.dataset == 'coco':
 
@@ -167,7 +167,7 @@ def main(args=None):
                 mAP = csv_eval.evaluate(dataset_val, retinanet)
 
             
-            scheduler.step(np.mean(epoch_loss))	
+        scheduler.step(np.mean(epoch_loss))	
 
 		torch.save(retinanet.module, '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
 
