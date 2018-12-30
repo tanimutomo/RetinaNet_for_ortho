@@ -100,7 +100,7 @@ def main(args=None):
     if use_gpu:
         retinanet = retinanet.cuda()
 
-    retinanet = torch.nn.DataParallel(retinanet).cuda()
+    retinanet = retinanet.cuda()
 
     retinanet.training = True
 
