@@ -118,7 +118,7 @@ def main(args=None):
     for epoch_num in range(parser.epochs):
 
         retinanet.train()
-        retinanet.module.freeze_bn()
+        retinanet.freeze_bn()
 
         epoch_loss = []
 
