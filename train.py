@@ -132,8 +132,8 @@ def main(args=None):
 
             loss = classification_loss + regression_loss
             
-            if bool(loss == 0):
-                continue
+            # if bool(loss == 0):
+            #     continue
 
             loss.backward()
 
