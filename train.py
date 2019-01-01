@@ -126,7 +126,12 @@ def main(args=None):
             try:
                 optimizer.zero_grad()
 
-                classification_loss, regression_loss = retinanet([data['img'].cuda().float(), data['annot']])
+                input = data['img'].cuda().float()
+                annot = data['annot']
+                print(input.shape)
+                print(annot.shape)
+
+                classification_loss, regression_loss = retinanet(input, annot)
 
                 classification_loss = classification_loss.mean()
                 regression_loss = regression_loss.mean()
