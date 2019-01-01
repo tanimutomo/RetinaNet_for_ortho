@@ -130,8 +130,10 @@ def main(args=None):
                 annot = data['annot']
                 print(input.shape)
                 print(annot.shape)
+                print(input.dtype)
+                print(annot.dtype)
 
-                classification_loss, regression_loss = retinanet(input, annot)
+                classification_loss, regression_loss = retinanet([input, annot])
 
                 classification_loss = classification_loss.mean()
                 regression_loss = regression_loss.mean()
