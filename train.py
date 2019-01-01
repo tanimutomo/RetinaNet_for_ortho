@@ -132,8 +132,8 @@ def main(args=None):
                 print(annot.shape)
                 print(input.cuda().dtype)
                 print(annot.cuda().dtype)
-                print(input.is_cuda())
-                print(annot.is_cuda())
+                print(input.is_cuda)
+                print(annot.is_cuda)
 
                 classification_loss, regression_loss = retinanet([input, annot])
 
