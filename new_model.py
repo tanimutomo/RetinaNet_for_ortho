@@ -233,6 +233,7 @@ class ResNet(nn.Module):
 
     def forward(self, inputs):
 
+        print('Now forward computation')
         if self.training:
             img_batch, annotations = inputs
         else:
