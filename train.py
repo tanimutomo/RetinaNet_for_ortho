@@ -111,7 +111,7 @@ def main(args=None):
     loss_hist = collections.deque(maxlen=500)
 
     retinanet.train()
-    retinanet.module.freeze_bn()
+    retinanet.freeze_bn()
 
     print('Num training images: {}'.format(len(dataset_train)))
 
