@@ -74,7 +74,7 @@ def main(args=None):
     else:
         raise ValueError('Dataset type not understood (must be csv or coco), exiting.')
 
-    sampler = AspectRatioBasedSampler(dataset_train, batch_size=2, drop_last=False)
+    sampler = AspectRatioBasedSampler(dataset_train, batch_size=4, drop_last=False)
     dataloader_train = DataLoader(dataset_train, num_workers=0, collate_fn=collater, batch_sampler=sampler)
 
     if dataset_val is not None:
@@ -128,10 +128,6 @@ def main(args=None):
 
                 input = data['img'].cuda().float()
                 annot = data['annot'].cuda()
-                print(input.shape)
-                print(annot.shape)
-                print(input.is_cuda)
-                print(annot.is_cuda)
 
                 classification_loss, regression_loss = retinanet([input, annot])
 
@@ -161,20 +157,20 @@ def main(args=None):
                 print(e)
                 continue
 
-            if parser.dataset == 'coco':
+        if parser.dataset == 'coco':
 
-                print('Evaluating dataset')
+            print('Evaluating dataset')
 
-                coco_eval.evaluate_coco(dataset_val, retinanet)
+            coco_eval.evaluate_coco(dataset_val, retinanet)
 
-            elif parser.dataset == 'csv' and parser.csv_val is not None:
+        elif parser.dataset == 'csv' and parser.csv_val is not None:
 
-                print('Evaluating dataset')
+            print('Evaluating dataset')
 
-                mAP = csv_eval.evaluate(dataset_val, retinanet)
+            mAP = csv_eval.evaluate(dataset_val, retinanet)
 
             
-            scheduler.step(np.mean(epoch_loss))	
+        scheduler.step(np.mean(epoch_loss))	
 
         torch.save(retinanet.module, '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
 
