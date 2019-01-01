@@ -127,11 +127,9 @@ def main(args=None):
                 optimizer.zero_grad()
 
                 input = data['img'].cuda().float()
-                annot = data['annot']
+                annot = data['annot'].cuda()
                 print(input.shape)
                 print(annot.shape)
-                print(input.cuda().dtype)
-                print(annot.cuda().dtype)
                 print(input.is_cuda)
                 print(annot.is_cuda)
 
