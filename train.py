@@ -179,6 +179,8 @@ def main(args=None):
                     os.path.join('saved_models', 'model_final_{}.pth'.format(epoch_num)))
         # torch.save(retinanet.module, '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
 
+        retinanet.load_state_dict(torch.load("./saved_models/model_final_0.pth"))
+
     # retinanet.eval()
 
     # torch.save(retinanet.state_dict(), 
