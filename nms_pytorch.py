@@ -15,8 +15,8 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
         The indices of the kept boxes with respect to num_priors.
     """
 
-    print("boxes: ", boxes.shape)
-    print("scores: ", scores.shape)
+    # print("boxes: ", boxes.shape)
+    # print("scores: ", scores.shape)
     keep = scores.new(scores.size(0)).zero_().long()
     if boxes.numel() == 0:
         return keep
@@ -36,7 +36,7 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
     h = boxes.new()
 
     # keep = torch.Tensor()
-    print('idx: ', idx.shape)
+    # print('idx: ', idx.shape)
     count = 0
     while idx.numel() > 0:
         i = idx[-1]  # index of current largest val
@@ -46,9 +46,9 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
         if idx.size(0) == 1:
             break
         idx = idx[:-1]  # remove kept element from view
-        print('x1: ', x1.shape)
-        print('idx: ', idx.shape)
-        print('xx1: ', xx1.shape)
+        # print('x1: ', x1.shape)
+        # print('idx: ', idx.shape)
+        # print('xx1: ', xx1.shape)
         # load bboxes of next highest vals
         torch.index_select(x1, 0, idx, out=xx1)
         torch.index_select(y1, 0, idx, out=yy1)
@@ -74,6 +74,6 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
         # keep only elements with an IoU <= overlap
         idx = idx[IoU.le(overlap)]
 
-    print(keep)
+    print(keep.shape)
     print(count)
     return keep, count
