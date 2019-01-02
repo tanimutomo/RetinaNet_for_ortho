@@ -175,12 +175,14 @@ def main(args=None):
             
         scheduler.step(np.mean(epoch_loss))	
 
-        torch.save(retinanet.module, '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
+        torch.save(retinanet.state_dict(), 
+                    os.path.join('saved_models', 'model_final_{}.pth'.format(epoch_num)))
+        # torch.save(retinanet.module, '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
 
-    retinanet.eval()
+    # retinanet.eval()
 
-    torch.save(retinanet.state_dict(), 
-                os.path.join('saved_models', 'model_final_{}.pt'.format(epoch_num)))
+    # torch.save(retinanet.state_dict(), 
+    #             os.path.join('saved_models', 'model_final_{}.pth'.format(epoch_num)))
 
 if __name__ == '__main__':
     main()
