@@ -157,6 +157,9 @@ def main(args=None):
                 print(e)
                 continue
 
+            if iter_num == 10:
+                break
+
         if parser.dataset == 'coco':
 
             print('Evaluating dataset')

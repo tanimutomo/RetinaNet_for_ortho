@@ -265,12 +265,13 @@ class ResNet(nn.Module):
 
             scores = torch.max(classification, dim=2, keepdim=True)[0]
 
-            scores_over_thresh = (scores>0.05)[0, :, 0]
+            # scores_over_thresh = (scores>0.05)[0, :, 0]
+            scores_over_thresh = scores
 
-            if scores_over_thresh.sum() == 0:
-                print('early return')
-                # no boxes to NMS, just return
-                return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
+            # if scores_over_thresh.sum() == 0:
+            #     print('early return')
+            #     # no boxes to NMS, just return
+            #     return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
 
             print('Do print')
             classification = classification[:, scores_over_thresh, :]
