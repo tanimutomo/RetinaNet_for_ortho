@@ -15,6 +15,8 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
         The indices of the kept boxes with respect to num_priors.
     """
 
+    print("boxes: ", boxes.shape)
+    print("scores: ", scores.shape)
     keep = scores.new(scores.size(0)).zero_().long()
     if boxes.numel() == 0:
         return keep
@@ -34,6 +36,7 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
     h = boxes.new()
 
     # keep = torch.Tensor()
+    print('idx: ', idx.shape)
     count = 0
     while idx.numel() > 0:
         i = idx[-1]  # index of current largest val
