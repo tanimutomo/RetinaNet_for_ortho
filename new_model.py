@@ -291,8 +291,8 @@ class ResNet(nn.Module):
             # print('torch.cat([transformed_anchors, scores], dim=2)[0, :, :]', nms_input)
 
             # anchors_nms_idx = nms(torch.cat([transformed_anchors, scores], dim=2)[0, :, :], 0.5)
-            transformed_anchors = torch.unsqueeze(transformed_anchors, dim=0)
-            scores = torch.unsqueeze(scores, dim=0)
+            transformed_anchors = torch.squeeze(transformed_anchors, dim=0)
+            scores = torch.squeeze(scores, dim=0)
             anchors_nms_idx = nms(transformed_anchors, scores, 0.5)
             print(anchors_nms_idx)
 
