@@ -6,7 +6,7 @@ import torch.utils.model_zoo as model_zoo
 from utils import BasicBlock, Bottleneck, BBoxTransform, ClipBoxes
 from anchors import Anchors
 import losses
-# from lib.nms.pth_nms import pth_nms
+from lib.nms.pth_nms import pth_nms
 
 # def nms(dets, thresh):
 #     "Dispatch to either CPU or GPU NMS implementations.\
@@ -289,11 +289,11 @@ class ResNet(nn.Module):
             nms_input = nms_input[0, :, :]
             print('torch.cat([transformed_anchors, scores], dim=2)[0, :, :]', nms_input)
 
-            # anchors_nms_idx = nms(torch.cat([transformed_anchors, scores], dim=2)[0, :, :], 0.5)
+            anchors_nms_idx = nms(torch.cat([transformed_anchors, scores], dim=2)[0, :, :], 0.5)
 
-            # nms_scores, nms_class = classification[0, anchors_nms_idx, :].max(dim=1)
+            nms_scores, nms_class = classification[0, anchors_nms_idx, :].max(dim=1)
 
-            # return [nms_scores, nms_class, transformed_anchors[0, anchors_nms_idx, :]]
+            return [nms_scores, nms_class, transformed_anchors[0, anchors_nms_idx, :]]
 
 
 
