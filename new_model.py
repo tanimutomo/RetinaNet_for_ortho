@@ -274,9 +274,9 @@ class ResNet(nn.Module):
             #     return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
 
             print('Do print')
-            classification = classification[:, scores_over_thresh, :]
-            transformed_anchors = transformed_anchors[:, scores_over_thresh, :]
-            scores = scores[:, scores_over_thresh, :]
+            # classification = classification[:, scores_over_thresh, :]
+            # transformed_anchors = transformed_anchors[:, scores_over_thresh, :]
+            # scores = scores[:, scores_over_thresh, :]
 
             # print for exploring nms function
             print('classification: ', classification.shape)
