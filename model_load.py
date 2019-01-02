@@ -5,6 +5,6 @@ from dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBa
 
 
 dataset_train = CocoDataset("./data", set_name='train2017', transform=transforms.Compose([Normalizer(), Augmenter(), Resizer()]))
-retinanet = new_model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
+retinanet = new_model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
 
 retinanet.load_state_dict(torch.load("./saved_models/model_final_0.pth", map_location='cuda:0'))
