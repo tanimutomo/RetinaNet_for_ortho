@@ -234,7 +234,7 @@ class ResNet(nn.Module):
 
     def forward(self, inputs):
 
-        print('Now forward computation')
+        # print('Now forward computation')
         if self.training:
             img_batch, annotations = inputs
         else:
@@ -274,15 +274,15 @@ class ResNet(nn.Module):
             #     # no boxes to NMS, just return
             #     return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
 
-            print('Do print')
+            # print('Do print')
             # classification = classification[:, scores_over_thresh, :]
             # transformed_anchors = transformed_anchors[:, scores_over_thresh, :]
             # scores = scores[:, scores_over_thresh, :]
 
             # print for exploring nms function
-            print('classification: ', classification.shape)
-            print('transformed_anchors: ', transformed_anchors.shape)
-            print('scores: ', scores.shape)
+            # print('classification: ', classification.shape)
+            # print('transformed_anchors: ', transformed_anchors.shape)
+            # print('scores: ', scores.shape)
 
             # print('nms input')
             # nms_input = torch.cat([transformed_anchors, scores], dim=2)

@@ -74,6 +74,6 @@ def nms(boxes, scores, overlap=0.5, top_k=200):
         # keep only elements with an IoU <= overlap
         idx = idx[IoU.le(overlap)]
 
-    print(keep.shape)
-    print(count)
+    # print(keep.shape)
+    # print(count)
     return keep, count
