@@ -6,12 +6,13 @@ import torch.utils.model_zoo as model_zoo
 from utils import BasicBlock, Bottleneck, BBoxTransform, ClipBoxes
 from anchors import Anchors
 import losses
-from lib.nms.pth_nms import pth_nms
+# from lib.nms.pth_nms import pth_nms
+from nms_pytorch import nms
 
-def nms(dets, thresh):
-    "Dispatch to either CPU or GPU NMS implementations.\
-    Accept dets as tensor"""
-    return pth_nms(dets, thresh)
+# def nms(dets, thresh):
+#     "Dispatch to either CPU or GPU NMS implementations.\
+#     Accept dets as tensor"""
+#     return pth_nms(dets, thresh)
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -283,13 +284,17 @@ class ResNet(nn.Module):
             print('transformed_anchors: ', transformed_anchors.shape)
             print('scores: ', scores.shape)
 
-            print('nms input')
-            nms_input = torch.cat([transformed_anchors, scores], dim=2)
-            print('torch.cat([transformed_anchors, scores], dim=2)', nms_input)
-            nms_input = nms_input[0, :, :]
-            print('torch.cat([transformed_anchors, scores], dim=2)[0, :, :]', nms_input)
+            # print('nms input')
+            # nms_input = torch.cat([transformed_anchors, scores], dim=2)
+            # print('torch.cat([transformed_anchors, scores], dim=2)', nms_input)
+            # nms_input = nms_input[0, :, :]
+            # print('torch.cat([transformed_anchors, scores], dim=2)[0, :, :]', nms_input)
 
-            anchors_nms_idx = nms(torch.cat([transformed_anchors, scores], dim=2)[0, :, :], 0.5)
+            # anchors_nms_idx = nms(torch.cat([transformed_anchors, scores], dim=2)[0, :, :], 0.5)
+            transformed_anchors = torch.unsqueeze(transformed_anchors, dim=0)
+            scores = torch.unsqueeze(scores, dim=0)
+            anchors_nms_idx = nms(transformed_anchors, scores, 0.5)
+            print(anchors_nms_idx)
 
             nms_scores, nms_class = classification[0, anchors_nms_idx, :].max(dim=1)
 
