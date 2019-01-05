@@ -67,7 +67,7 @@ class NMS:
         h = boxes.new()
 
         # keep = torch.Tensor()
-        # print('idx: ', idx.shape)
+        print('idx: ', idx.shape)
         count = 0
         while idx.numel() > 0:
             i = idx[-1]  # index of current largest val
