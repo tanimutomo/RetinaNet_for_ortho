@@ -64,9 +64,7 @@ class Trainer:
         self.focal_loss = losses.FocalLoss()
 
         # module calcurating nms
-        self.regressBoxes = BBoxTransform()
-        self.clipBoxes = ClipBoxes()
-        self.nms = NMS(self.regressBoxes, clipBoxes)
+        self.nms = NMS(BBoxTransform, ClipBoxes)
         
     
     def set_dataset(self):
