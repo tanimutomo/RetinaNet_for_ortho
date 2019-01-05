@@ -231,31 +231,22 @@ class ResNet(nn.Module):
         # else:
         #     img_batch = inputs
             
-        print('check1')
         x = self.conv1(inputs)
-        print('check2')
         x = self.bn1(x)
-        print('check3')
         x = self.relu(x)
-        print('check4')
         x = self.maxpool(x)
 
-        print('check5')
         x1 = self.layer1(x)
         x2 = self.layer2(x1)
         x3 = self.layer3(x2)
         x4 = self.layer4(x3)
 
-        print('check6')
         features = self.fpn([x2, x3, x4])
 
-        print('check7')
         regression = torch.cat([self.regressionModel(feature) for feature in features], dim=1)
 
-        print('check8')
         classification = torch.cat([self.classificationModel(feature) for feature in features], dim=1)
 
-        print('check9')
         anchors = self.anchors(inputs)
 
         return [regression, classification, anchors]
