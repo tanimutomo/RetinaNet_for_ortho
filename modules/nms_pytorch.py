@@ -29,7 +29,7 @@ class NMS:
         transformed_anchors_sqz = torch.squeeze(transformed_anchors, dim=0)
         scores = torch.squeeze(scores, dim=0)
         scores = torch.squeeze(scores, dim=1)
-        print('3 ', scores.shape)
+        # print('3 ', scores.shape)
         anchors_nms_idx, _ = self.calcurate(transformed_anchors_sqz, scores)
 
         nms_scores, nms_class = classification[0, anchors_nms_idx, :].max(dim=1)
@@ -68,7 +68,7 @@ class NMS:
         h = boxes.new()
 
         # keep = torch.Tensor()
-        print('idx: ', idx.shape)
+        # print('idx: ', idx.shape)
         count = 0
         while idx.numel() > 0:
             i = idx[-1]  # index of current largest val
