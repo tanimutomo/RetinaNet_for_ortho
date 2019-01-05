@@ -133,7 +133,7 @@ class Trainer:
     def iterate(self):
         dataset_train, dataset_val = self.set_dataset()
         sampler = AspectRatioBasedSampler(dataset_train, batch_size=4, drop_last=False)
-        dataloader_train = DataLoader(dataset_train, num_workers=0, collate_fn=collater, batch_sampler=sampler)
+        dataloader_train = DataLoader(dataset_train, num_workers=2, collate_fn=collater, batch_sampler=sampler)
 
         # if dataset_val is not None:
         #     sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
