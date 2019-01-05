@@ -16,6 +16,8 @@ class NMS:
         scores_over_thresh = (scores>0.05)[0, :, 0]
         # scores_over_thresh = scores
 
+        print(scores_over_thresh.shape)
+        print(scores_over_thresh.sum())
         if scores_over_thresh.sum() == 0:
             # no boxes to NMS, just return
             return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
