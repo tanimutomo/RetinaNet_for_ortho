@@ -173,10 +173,7 @@ class Trainer:
 
                 regression, classification, anchors = self.retinanet(input)
 
-                print('start calc focal loss')
                 classification_loss, regression_loss = self.focal_loss.calcurate(classification, regression, anchors, annot)
-                print('end calc focal loss')
-
                 
                 classification_loss = classification_loss.mean()
                 regression_loss = regression_loss.mean()
