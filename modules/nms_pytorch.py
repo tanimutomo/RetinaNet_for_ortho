@@ -27,7 +27,8 @@ class NMS:
         scores = scores[:, scores_over_thresh, :]
 
         transformed_anchors_sqz = torch.squeeze(transformed_anchors, dim=0)
-        # scores = torch.squeeze(scores, dim=0)
+        scores = torch.squeeze(scores, dim=0)
+        scores = torch.squeeze(scores, dim=1)
         print('3 ', scores.shape)
         anchors_nms_idx, _ = self.calcurate(transformed_anchors_sqz, scores)
 
