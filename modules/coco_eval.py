@@ -25,7 +25,11 @@ def evaluate_coco(dataset, model, nms, device, threshold=0.05):
 
             # run network
             inputs = data['img'].permute(2, 0, 1).to(device).float().unsqueeze(dim=0)
+            print('1 ', inputs.is_cuda)
             classification, regression, anchors = model(inputs)
+            print('2 ', classification.is_cuda)
+            print('3 ', regression.is_cuda)
+            print('4 ', anchors.is_cuda)
             scores, labels, boxes = nms.calc_from_retinanet_output(inputs, classification, regression, anchors)
             scores = scores.cpu()
             labels = labels.cpu()

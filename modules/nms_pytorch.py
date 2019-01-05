@@ -9,6 +9,10 @@ class NMS:
         self.clipBoxes = ClipBoxes()
 
     def calc_from_retinanet_output(self, inputs, classification, regression, anchors):
+        print('1 ', inputs.is_cuda)
+        print('2 ', classification.is_cuda)
+        print('3 ', regression.is_cuda)
+        print('4 ', anchors.is_cuda)
         transformed_anchors = self.regressBoxes(anchors, regression)
         transformed_anchors = self.clipBoxes(transformed_anchors, inputs)
         scores = torch.max(classification, dim=2, keepdim=True)[0]
