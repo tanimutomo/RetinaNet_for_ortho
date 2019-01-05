@@ -13,17 +13,16 @@ class NMS:
         transformed_anchors = self.clipBoxes(transformed_anchors, inputs)
         scores = torch.max(classification, dim=2, keepdim=True)[0]
 
-        # scores_over_thresh = (scores>0.05)[0, :, 0]
-        scores_over_thresh = scores
+        scores_over_thresh = (scores>0.05)[0, :, 0]
+        # scores_over_thresh = scores
 
-        # if scores_over_thresh.sum() == 0:
-        #     print('early return')
-        #     # no boxes to NMS, just return
-        #     return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
+        if scores_over_thresh.sum() == 0:
+            # no boxes to NMS, just return
+            return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
 
-        # classification = classification[:, scores_over_thresh, :]
-        # transformed_anchors = transformed_anchors[:, scores_over_thresh, :]
-        # scores = scores[:, scores_over_thresh, :]
+        classification = classification[:, scores_over_thresh, :]
+        transformed_anchors = transformed_anchors[:, scores_over_thresh, :]
+        scores = scores[:, scores_over_thresh, :]
 
         transformed_anchors_sqz = torch.squeeze(transformed_anchors, dim=0)
         scores = torch.squeeze(scores)
