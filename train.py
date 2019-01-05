@@ -16,7 +16,7 @@ from torch.autograd import Variable
 from torchvision import datasets, models, transforms
 import torchvision
 
-import new_model
+import model
 from anchors import Anchors
 import losses
 from dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer
