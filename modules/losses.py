@@ -37,39 +37,55 @@ class FocalLoss:
         anchor_ctr_x   = anchor[:, 0] + 0.5 * anchor_widths
         anchor_ctr_y   = anchor[:, 1] + 0.5 * anchor_heights
 
+        print("batch_size: ", batch_size)
         for j in range(batch_size):
 
+            print('check1')
             classification = classifications[j, :, :]
+            print('check2')
             regression = regressions[j, :, :]
 
+            print('check3')
             bbox_annotation = annotations[j, :, :]
+            print('check4')
             bbox_annotation = bbox_annotation[bbox_annotation[:, 4] != -1]
 
+            print('check5')
             if bbox_annotation.shape[0] == 0:
+                print('check6')
                 regression_losses.append(torch.tensor(0).float().cuda())
+                print('check7')
                 classification_losses.append(torch.tensor(0).float().cuda())
 
                 continue
 
+            print('check8')
             classification = torch.clamp(classification, 1e-4, 1.0 - 1e-4)
+            print('check9')
 
             IoU = calc_iou(anchors[0, :, :], bbox_annotation[:, :4]) # num_anchors x num_annotations
 
+            print('check10')
             IoU_max, IoU_argmax = torch.max(IoU, dim=1) # num_anchors x 1
 
             #import pdb
             #pdb.set_trace()
 
             # compute the loss for classification
+            print('check11')
             targets = torch.ones(classification.shape) * -1
             targets = targets.cuda()
 
+            print('check12')
             targets[torch.lt(IoU_max, 0.4), :] = 0
 
+            print('check13')
             positive_indices = torch.ge(IoU_max, 0.5)
 
+            print('check14')
             num_positive_anchors = positive_indices.sum()
 
+            print('check15')
             assigned_annotations = bbox_annotation[IoU_argmax, :]
 
             targets[positive_indices, :] = 0
