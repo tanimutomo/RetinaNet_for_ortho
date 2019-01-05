@@ -89,18 +89,10 @@ class Trainer:
         else:
             raise ValueError('Dataset type not understood (must be csv or coco), exiting.')
 
-        sampler = AspectRatioBasedSampler(dataset_train, batch_size=4, drop_last=False)
-        dataloader_train = DataLoader(dataset_train, num_workers=0, collate_fn=collater, batch_sampler=sampler)
-
-        # if dataset_val is not None:
-        #     sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
-        #     dataloader_val = DataLoader(dataset_val, num_workers=0, collate_fn=collater, batch_sampler=sampler_val)
-        print('Num training images: {}'.format(len(dataset_train)))
-
-        return dataloader_train, dataset_val
+        return dataset_train, dataset_val
 
 
-    def set_models(self):
+    def set_models(self, dataset_train):
         # Create the model
         if self.depth == 18:
             retinanet = model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
@@ -115,7 +107,7 @@ class Trainer:
         else:
             raise ValueError('Unsupported model depth, must be one of 18, 34, 50, 101, 152')		
 
-        self.retinanet = retinanet.to(device)
+        self.retinanet = retinanet.to(self.device)
 
         self.retinanet.training = True
 
@@ -130,30 +122,44 @@ class Trainer:
         
     
     def iterate(self):
-        dataloader_train, dataset_val = self.set_dataset()
-        self.set_models()
+        dataset_train, dataset_val = self.set_dataset()
+        sampler = AspectRatioBasedSampler(dataset_train, batch_size=4, drop_last=False)
+        dataloader_train = DataLoader(dataset_train, num_workers=0, collate_fn=collater, batch_sampler=sampler)
+
+        # if dataset_val is not None:
+        #     sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
+        #     dataloader_val = DataLoader(dataset_val, num_workers=0, collate_fn=collater, batch_sampler=sampler_val)
+        print('Num training images: {}'.format(len(dataset_train)))
+
+        self.set_models(dataset_train)
 
         for epoch_num in range(self.epochs):
 
             self.retinanet.train()
             self.retinanet.freeze_bn()
 
-            self.train(dataloader_train)
+            self.train(epoch_num, dataloader_train)
 
             self.retinanet.eval()
 
-            self.evaluate(dataset_val)
+            self.evaluate(epoch_num, dataset_val)
+
+            torch.save(self.retinanet.state_dict(), 
+                        os.path.join('./saved_models', 'model_final_{}.pth'.format(epoch_num)))
+            # torch.save(self.retinanet.module, '{}_self.retinanet_{}.pt'.format(self.dataset, epoch_num))
+
+            # self.retinanet.load_state_dict(torch.load("./saved_models/model_final_0.pth"))
 
 
 
-    def train(self, dataloaders):
+    def train(self, epoch_num, dataloaders):
         epoch_loss = []
         for iter_num, data in enumerate(dataloader_train):
             try:
                 self.optimizer.zero_grad()
 
-                input = data['img'].to(device).float()
-                annot = data['annot'].to(device)
+                input = data['img'].to(self.device).float()
+                annot = data['annot'].to(self.device)
 
                 classification_loss, regression_loss = self.retinanet([input, annot])
 
@@ -187,7 +193,7 @@ class Trainer:
                 break
 
 
-    def evaluate(self, dataloader_val):
+    def evaluate(self, epoch_num, dataloader_val):
         if self.dataset == 'coco':
 
             print('Evaluating dataset')
@@ -205,11 +211,6 @@ class Trainer:
 
         self.retinanet.eval()
 
-        torch.save(self.retinanet.state_dict(), 
-                    os.path.join('./saved_models', 'model_final_{}.pth'.format(epoch_num)))
-        # torch.save(self.retinanet.module, '{}_self.retinanet_{}.pt'.format(self.dataset, epoch_num))
-
-        # self.retinanet.load_state_dict(torch.load("./saved_models/model_final_0.pth"))
 
 
 
