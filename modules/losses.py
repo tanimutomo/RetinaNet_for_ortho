@@ -72,12 +72,13 @@ class FocalLoss:
             num_positive_anchors = positive_indices.sum()
 
             assigned_annotations = bbox_annotation[IoU_argmax, :]
-            print('check1')
 
-            targets[positive_indices, :] = 0
-            print('check2')
+            # Cause error
+            print(targets.shape)
+            print(positive_indices)
+            print(assigned_annotations.shape)
+            print(assigned_annotations[positive_indices, 4])
             targets[positive_indices, assigned_annotations[positive_indices, 4].long()] = 1
-            print('check3')
 
             alpha_factor = torch.ones(targets.shape).cuda() * alpha
 
