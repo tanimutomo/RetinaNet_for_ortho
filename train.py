@@ -113,6 +113,7 @@ class Trainer:
 
         self.optimizer = optim.Adam(self.retinanet.parameters(), lr=1e-5)
 
+        # This lr_shceduler reduce the learning rate based on the models's validation loss
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, patience=3, verbose=True)
 
         self.loss_hist = collections.deque(maxlen=500)
@@ -134,11 +135,12 @@ class Trainer:
         self.set_models(dataset_train)
 
         for epoch_num in range(self.epochs):
+            epoch_loss = []
 
             self.retinanet.train()
             self.retinanet.freeze_bn()
 
-            self.train(epoch_num, dataloader_train)
+            epoch_loss = self.train(epoch_num, epoch_loss, dataloader_train)
 
             self.retinanet.eval()
 
@@ -150,10 +152,12 @@ class Trainer:
 
             # self.retinanet.load_state_dict(torch.load("./saved_models/model_final_0.pth"))
 
+            self.scheduler.step(np.mean(epoch_loss))	
+            self.retinanet.eval()
 
 
-    def train(self, epoch_num, dataloader_train):
-        epoch_loss = []
+
+    def train(self, epoch_num, epoch_loss, dataloader_train):
         for iter_num, data in enumerate(dataloader_train):
             try:
                 self.optimizer.zero_grad()
@@ -192,6 +196,8 @@ class Trainer:
             if iter_num == 10:
                 break
 
+        return epoch_loss
+
 
     def evaluate(self, epoch_num, dataset_val):
         if self.dataset == 'coco':
@@ -205,13 +211,6 @@ class Trainer:
             print('Evaluating dataset')
 
             mAP = csv_eval.evaluate(dataset_val, self.retinanet)
-
-            
-        self.scheduler.step(np.mean(epoch_loss))	
-
-        self.retinanet.eval()
-
-
 
 
 if __name__ == '__main__':
