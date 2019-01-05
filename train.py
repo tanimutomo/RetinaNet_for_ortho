@@ -83,15 +83,15 @@ def main(args=None):
 
     # Create the model
     if parser.depth == 18:
-        retinanet = new_model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
     elif parser.depth == 34:
-        retinanet = new_model.resnet34(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet34(num_classes=dataset_train.num_classes(), pretrained=True)
     elif parser.depth == 50:
-        retinanet = new_model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
     elif parser.depth == 101:
-        retinanet = new_model.resnet101(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet101(num_classes=dataset_train.num_classes(), pretrained=True)
     elif parser.depth == 152:
-        retinanet = new_model.resnet152(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet152(num_classes=dataset_train.num_classes(), pretrained=True)
     else:
         raise ValueError('Unsupported model depth, must be one of 18, 34, 50, 101, 152')		
 
