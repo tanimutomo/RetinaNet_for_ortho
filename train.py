@@ -22,6 +22,7 @@ from modules import losses
 from modules.dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer
 from modules import coco_eval
 from modules import csv_eval
+from modules.nms_pytorch import NMS
 
 import model
 
@@ -58,6 +59,12 @@ class Trainer:
         # set device
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+        # set focal loss
+        self.focal_loss = losses.FocalLoss()
+
+        # module calcurating nms
+        self.nms = NMS()
+        
     
     def set_dataset(self):
         # Create the data loaders
@@ -120,7 +127,7 @@ class Trainer:
 
         # self.retinanet.train()
         # self.retinanet.freeze_bn()
-        
+
     
     def iterate(self):
         dataset_train, dataset_val = self.set_dataset()
@@ -156,7 +163,6 @@ class Trainer:
             self.retinanet.eval()
 
 
-
     def train(self, epoch_num, epoch_loss, dataloader_train):
         for iter_num, data in enumerate(dataloader_train):
             try:
@@ -165,8 +171,10 @@ class Trainer:
                 input = data['img'].to(self.device).float()
                 annot = data['annot'].to(self.device)
 
-                classification_loss, regression_loss = self.retinanet([input, annot])
+                classification, regression, anchors = self.retinanet(input)
+                classification_loss, regression_loss = self.focal_loss(classification, regression, anchors, annot)
 
+                
                 classification_loss = classification_loss.mean()
                 regression_loss = regression_loss.mean()
 
@@ -204,7 +212,7 @@ class Trainer:
 
             print('Evaluating dataset')
 
-            coco_eval.evaluate_coco(dataset_val, self.retinanet)
+            coco_eval.evaluate_coco(dataset_val, self.retinanet, self.nms, self.device)
 
         elif self.dataset == 'csv' and self.csv_val is not None:
 

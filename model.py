@@ -6,8 +6,6 @@ import torch.utils.model_zoo as model_zoo
 
 from modules.utils import BasicBlock, Bottleneck, BBoxTransform, ClipBoxes
 from modules.anchors import Anchors
-from modules import losses
-from modules.nms_pytorch import nms
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -184,8 +182,6 @@ class ResNet(nn.Module):
 
         self.clipBoxes = ClipBoxes()
         
-        self.focalLoss = losses.FocalLoss()
-                
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
@@ -230,12 +226,12 @@ class ResNet(nn.Module):
     def forward(self, inputs):
 
         # print('Now forward computation')
-        if self.training:
-            img_batch, annotations = inputs
-        else:
-            img_batch = inputs
+        # if self.training:
+        #     img_batch, annotations = inputs
+        # else:
+        #     img_batch = inputs
             
-        x = self.conv1(img_batch)
+        x = self.conv1(inputs)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
@@ -251,48 +247,50 @@ class ResNet(nn.Module):
 
         classification = torch.cat([self.classificationModel(feature) for feature in features], dim=1)
 
-        anchors = self.anchors(img_batch)
+        anchors = self.anchors(inputs)
 
-        if self.training:
-            return self.focalLoss(classification, regression, anchors, annotations)
-        else:
-            transformed_anchors = self.regressBoxes(anchors, regression)
-            transformed_anchors = self.clipBoxes(transformed_anchors, img_batch)
+        return [regression, classification, anchors]
 
-            scores = torch.max(classification, dim=2, keepdim=True)[0]
+        # if self.training:
+        #     return self.focalLoss(classification, regression, anchors, annotations)
+        # else:
+        #     transformed_anchors = self.regressBoxes(anchors, regression)
+        #     transformed_anchors = self.clipBoxes(transformed_anchors, inputs)
 
-            # scores_over_thresh = (scores>0.05)[0, :, 0]
-            scores_over_thresh = scores
+        #     scores = torch.max(classification, dim=2, keepdim=True)[0]
 
-            # if scores_over_thresh.sum() == 0:
-            #     print('early return')
-            #     # no boxes to NMS, just return
-            #     return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
+        #     # scores_over_thresh = (scores>0.05)[0, :, 0]
+        #     scores_over_thresh = scores
 
-            # print('Do print')
-            # classification = classification[:, scores_over_thresh, :]
-            # transformed_anchors = transformed_anchors[:, scores_over_thresh, :]
-            # scores = scores[:, scores_over_thresh, :]
+        #     # if scores_over_thresh.sum() == 0:
+        #     #     print('early return')
+        #     #     # no boxes to NMS, just return
+        #     #     return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
 
-            # print for exploring nms function
-            # print('classification: ', classification.shape)
-            # print('transformed_anchors: ', transformed_anchors.shape)
-            # print('scores: ', scores.shape)
+        #     # print('Do print')
+        #     # classification = classification[:, scores_over_thresh, :]
+        #     # transformed_anchors = transformed_anchors[:, scores_over_thresh, :]
+        #     # scores = scores[:, scores_over_thresh, :]
 
-            # print('nms input')
-            # nms_input = torch.cat([transformed_anchors, scores], dim=2)
-            # print('torch.cat([transformed_anchors, scores], dim=2)', nms_input)
-            # nms_input = nms_input[0, :, :]
-            # print('torch.cat([transformed_anchors, scores], dim=2)[0, :, :]', nms_input)
+        #     # print for exploring nms function
+        #     # print('classification: ', classification.shape)
+        #     # print('transformed_anchors: ', transformed_anchors.shape)
+        #     # print('scores: ', scores.shape)
 
-            # anchors_nms_idx = nms(torch.cat([transformed_anchors, scores], dim=2)[0, :, :], 0.5)
-            transformed_anchors_sqz = torch.squeeze(transformed_anchors, dim=0)
-            scores = torch.squeeze(scores)
-            anchors_nms_idx, _ = nms(transformed_anchors_sqz, scores, 0.5)
+        #     # print('nms input')
+        #     # nms_input = torch.cat([transformed_anchors, scores], dim=2)
+        #     # print('torch.cat([transformed_anchors, scores], dim=2)', nms_input)
+        #     # nms_input = nms_input[0, :, :]
+        #     # print('torch.cat([transformed_anchors, scores], dim=2)[0, :, :]', nms_input)
 
-            nms_scores, nms_class = classification[0, anchors_nms_idx, :].max(dim=1)
+        #     # anchors_nms_idx = nms(torch.cat([transformed_anchors, scores], dim=2)[0, :, :], 0.5)
+        #     transformed_anchors_sqz = torch.squeeze(transformed_anchors, dim=0)
+        #     scores = torch.squeeze(scores)
+        #     anchors_nms_idx, _ = nms(transformed_anchors_sqz, scores, 0.5)
 
-            return [nms_scores, nms_class, transformed_anchors[0, anchors_nms_idx, :]]
+        #     nms_scores, nms_class = classification[0, anchors_nms_idx, :].max(dim=1)
+
+        #     return [nms_scores, nms_class, transformed_anchors[0, anchors_nms_idx, :]]
 
 
 
