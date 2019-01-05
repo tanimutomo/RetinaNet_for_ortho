@@ -46,8 +46,8 @@ class NMS:
             The indices of the kept boxes with respect to num_priors.
         """
 
-        # print("boxes: ", boxes.shape)
-        # print("scores: ", scores.shape)
+        print("boxes: ", boxes.shape)
+        print(boxes.numel())
         keep = scores.new(scores.size(0)).zero_().long()
         if boxes.numel() == 0:
             return keep
