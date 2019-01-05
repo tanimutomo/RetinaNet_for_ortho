@@ -175,8 +175,8 @@ class Trainer:
                 classification_loss, regression_loss = self.focal_loss(classification, regression, anchors, annot)
 
                 
-                classification_loss = classification_loss.mean()
-                regression_loss = regression_loss.mean()
+                classification_loss = classification_loss.data().mean()
+                regression_loss = regression_loss.data().mean()
 
                 loss = classification_loss + regression_loss
                 
