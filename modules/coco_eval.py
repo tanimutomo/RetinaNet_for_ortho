@@ -6,10 +6,10 @@ from pycocotools.cocoeval import COCOeval
 import numpy as np
 import json
 import os
-
 import torch
 
-def evaluate_coco(dataset, model, threshold=0.05):
+
+def evaluate_coco(dataset, model, nms, device, threshold=0.05):
     
     model.eval()
     
@@ -19,12 +19,15 @@ def evaluate_coco(dataset, model, threshold=0.05):
         results = []
         image_ids = []
 
+        print("Validation Data: ", len(dataset))
         for index in range(len(dataset)):
             data = dataset[index]
             scale = data['scale']
 
             # run network
-            scores, labels, boxes = model(data['img'].permute(2, 0, 1).cuda().float().unsqueeze(dim=0))
+            inputs = data['img'].permute(2, 0, 1).to(device).float().unsqueeze(dim=0)
+            regression, classification, anchors = model(inputs)
+            scores, labels, boxes = nms.calc_from_retinanet_output(inputs, regression, classification, anchors)
             scores = scores.cpu()
             labels = labels.cpu()
             boxes  = boxes.cpu()

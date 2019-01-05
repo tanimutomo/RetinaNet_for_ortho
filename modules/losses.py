@@ -24,7 +24,7 @@ def calc_iou(a, b):
 class FocalLoss(nn.Module):
     #def __init__(self):
 
-    def forward(self, classifications, regressions, anchors, annotations):
+    def calcurate(self, classifications, regressions, anchors, annotations):
         alpha = 0.25
         gamma = 2.0
         batch_size = classifications.shape[0]
@@ -73,7 +73,7 @@ class FocalLoss(nn.Module):
 
             assigned_annotations = bbox_annotation[IoU_argmax, :]
 
-            targets[positive_indices, :] = 0
+            # Cause error
             targets[positive_indices, assigned_annotations[positive_indices, 4].long()] = 1
 
             alpha_factor = torch.ones(targets.shape).cuda() * alpha
@@ -133,6 +133,7 @@ class FocalLoss(nn.Module):
                 regression_losses.append(regression_loss.mean())
             else:
                 regression_losses.append(torch.tensor(0).float().cuda())
+
 
         return torch.stack(classification_losses).mean(dim=0, keepdim=True), torch.stack(regression_losses).mean(dim=0, keepdim=True)
 

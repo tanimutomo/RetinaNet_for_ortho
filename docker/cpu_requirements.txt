@@ -1,10 +1,10 @@
 torch==0.4.1
 torchvision
-numpy
+numpy==1.11.1
 Cython
 cffi
 pandas
 opencv-python
 requests
-matplotlib
+matplotlib==2.0.0
 scikit-image
