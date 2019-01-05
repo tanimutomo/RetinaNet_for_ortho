@@ -110,6 +110,8 @@ dmypy.json
 
 # my setting
 data/
+others/
+saved_models/
 .gitkeep
 
 *.pt

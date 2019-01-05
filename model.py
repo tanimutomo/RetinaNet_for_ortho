@@ -3,10 +3,11 @@ import torch
 import math
 import time
 import torch.utils.model_zoo as model_zoo
-from utils import BasicBlock, Bottleneck, BBoxTransform, ClipBoxes
-from anchors import Anchors
-import losses
-from nms_pytorch import nms
+
+from modules.utils import BasicBlock, Bottleneck, BBoxTransform, ClipBoxes
+from modules.anchors import Anchors
+from modules import losses
+from modules.nms_pytorch import nms
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
