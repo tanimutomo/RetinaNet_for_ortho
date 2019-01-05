@@ -101,6 +101,7 @@ class Trainer:
 
     def set_models(self, dataset_train):
         # Create the model
+        print(dataset_train.num_classes())
         if self.depth == 18:
             retinanet = model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
         elif self.depth == 34:
