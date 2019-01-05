@@ -95,6 +95,7 @@ class Trainer:
         # if dataset_val is not None:
         #     sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
         #     dataloader_val = DataLoader(dataset_val, num_workers=0, collate_fn=collater, batch_sampler=sampler_val)
+        print('Num training images: {}'.format(len(dataset_train)))
 
         return dataloader_train, dataset_val
 
@@ -129,7 +130,6 @@ class Trainer:
         
     
     def iterate(self):
-        print('Num training images: {}'.format(len(dataset_train)))
         dataloader_train, dataset_val = self.set_dataset()
         self.set_models()
 
