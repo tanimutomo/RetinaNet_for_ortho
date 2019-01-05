@@ -74,10 +74,6 @@ class FocalLoss:
             assigned_annotations = bbox_annotation[IoU_argmax, :]
 
             # Cause error
-            print(targets.shape)
-            print(positive_indices)
-            print(assigned_annotations.shape)
-            print(assigned_annotations[positive_indices, 4])
             targets[positive_indices, assigned_annotations[positive_indices, 4].long()] = 1
 
             alpha_factor = torch.ones(targets.shape).cuda() * alpha

@@ -101,7 +101,6 @@ class Trainer:
 
     def set_models(self, dataset_train):
         # Create the model
-        print(dataset_train.num_classes())
         if self.depth == 18:
             retinanet = model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
         elif self.depth == 34:
@@ -172,9 +171,9 @@ class Trainer:
                 input = data['img'].to(self.device).float()
                 annot = data['annot'].to(self.device)
 
-                classification, regression, anchors = self.retinanet(input)
-                classification = classification.detach()
+                regression, classification, anchors = self.retinanet(input)
                 regression = regression.detach()
+                classification = classification.detach()
                 anchors = anchors.detach()
 
                 print('start calc focal loss')
