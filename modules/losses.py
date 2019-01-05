@@ -75,31 +75,24 @@ class FocalLoss:
             print('check1')
 
             targets[positive_indices, :] = 0
-            targets[positive_indices, assigned_annotations[positive_indices, 4].long()] = 1
             print('check2')
-
-            alpha_factor = torch.ones(targets.shape).cuda() * alpha
+            targets[positive_indices, assigned_annotations[positive_indices, 4].long()] = 1
             print('check3')
 
+            alpha_factor = torch.ones(targets.shape).cuda() * alpha
+
             alpha_factor = torch.where(torch.eq(targets, 1.), alpha_factor, 1. - alpha_factor)
-            print('check4')
             focal_weight = torch.where(torch.eq(targets, 1.), 1. - classification, classification)
-            print('check5')
             focal_weight = alpha_factor * torch.pow(focal_weight, gamma)
-            print('check6')
 
             bce = -(targets * torch.log(classification) + (1.0 - targets) * torch.log(1.0 - classification))
-            print('check7')
 
             # cls_loss = focal_weight * torch.pow(bce, gamma)
             cls_loss = focal_weight * bce
-            print('check8')
 
             cls_loss = torch.where(torch.ne(targets, -1.0), cls_loss, torch.zeros(cls_loss.shape).cuda())
-            print('check9')
 
             classification_losses.append(cls_loss.sum()/torch.clamp(num_positive_anchors.float(), min=1.0))
-            print('check10')
 
             # compute the loss for regression
 
