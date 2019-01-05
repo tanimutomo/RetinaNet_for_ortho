@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import torch.nn as nn
 
 def calc_iou(a, b):
     area = (b[:, 2] - b[:, 0]) * (b[:, 3] - b[:, 1])
@@ -20,7 +21,7 @@ def calc_iou(a, b):
 
     return IoU
 
-class FocalLoss:
+class FocalLoss(nn.Module):
     #def __init__(self):
 
     def calcurate(self, classifications, regressions, anchors, annotations):
@@ -37,7 +38,6 @@ class FocalLoss:
         anchor_ctr_x   = anchor[:, 0] + 0.5 * anchor_widths
         anchor_ctr_y   = anchor[:, 1] + 0.5 * anchor_heights
 
-        print("batch_size: ", batch_size)
         for j in range(batch_size):
 
             classification = classifications[j, :, :]
