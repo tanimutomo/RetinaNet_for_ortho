@@ -16,8 +16,8 @@ class NMS:
         scores_over_thresh = (scores>0.05)[0, :, 0]
         # scores_over_thresh = scores
 
-        print(scores_over_thresh.shape)
-        print(scores_over_thresh.sum())
+        print('1 ', scores_over_thresh.shape)
+        print('2 ', scores_over_thresh.sum())
         if scores_over_thresh.sum() == 0:
             # no boxes to NMS, just return
             return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
@@ -27,7 +27,8 @@ class NMS:
         scores = scores[:, scores_over_thresh, :]
 
         transformed_anchors_sqz = torch.squeeze(transformed_anchors, dim=0)
-        scores = torch.squeeze(scores)
+        scores = torch.squeeze(scores, dim=0)
+        print('3 ', scores.shape)
         anchors_nms_idx, _ = self.calcurate(transformed_anchors_sqz, scores)
 
         nms_scores, nms_class = classification[0, anchors_nms_idx, :].max(dim=1)
