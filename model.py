@@ -4,7 +4,7 @@ import math
 import time
 import torch.utils.model_zoo as model_zoo
 
-from modules.utils import BasicBlock, Bottleneck, BBoxTransform, ClipBoxes
+from modules.utils import BasicBlock, Bottleneck
 from modules.anchors import Anchors
 
 model_urls = {
@@ -178,9 +178,6 @@ class ResNet(nn.Module):
 
         self.anchors = Anchors()
 
-        self.regressBoxes = BBoxTransform()
-
-        self.clipBoxes = ClipBoxes()
         
         for m in self.modules():
             if isinstance(m, nn.Conv2d):

@@ -23,6 +23,7 @@ from modules.dataloader import CocoDataset, CSVDataset, collater, Resizer, Aspec
 from modules import coco_eval
 from modules import csv_eval
 from modules.nms_pytorch import NMS
+from modules.utils import BBoxTransform, ClipBoxes
 
 import model
 
@@ -63,7 +64,9 @@ class Trainer:
         self.focal_loss = losses.FocalLoss()
 
         # module calcurating nms
-        self.nms = NMS()
+        self.regressBoxes = BBoxTransform()
+        self.clipBoxes = ClipBoxes()
+        self.nms = NMS(self.regressBoxes, clipBoxes)
         
     
     def set_dataset(self):
