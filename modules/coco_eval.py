@@ -12,7 +12,6 @@ import torch
 def evaluate_coco(dataset, model, nms, device, threshold=0.05):
     
     model.eval()
-    nms = NMS()
     
     with torch.no_grad():
 
