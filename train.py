@@ -55,7 +55,7 @@ class Trainer:
         self.depth = 50
 
         # Number of epochs
-        self.epochs = 1
+        self.epochs = 3
 
         # set device
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -203,8 +203,8 @@ class Trainer:
                 print(e)
                 continue
 
-            if iter_num == 10:
-                break
+            # if iter_num == 10:
+            #     break
 
         return epoch_loss
 

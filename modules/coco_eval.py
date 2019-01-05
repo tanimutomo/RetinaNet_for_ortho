@@ -21,7 +21,6 @@ def evaluate_coco(dataset, model, nms, device, threshold=0.05):
 
         print("Validation Data: ", len(dataset))
         for index in range(len(dataset)):
-            print(index)
             data = dataset[index]
             scale = data['scale']
 
