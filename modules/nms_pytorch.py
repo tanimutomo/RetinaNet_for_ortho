@@ -5,8 +5,8 @@ import torch
 # Ported to PyTorch by Max deGroot (02/01/2017)
 class NMS:
     def __init__(self, BBoxTransform, ClipBoxes):
-        self.regressBoxes = regressBoxes()
-        self.clipBoxes = clipBoxes()
+        self.regressBoxes = BBoxTransform()
+        self.clipBoxes = ClipBoxes()
 
     def calc_from_retinanet_output(self, classification, regression, anchors):
         transformed_anchors = self.regressBoxes(anchors, regression)
