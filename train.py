@@ -172,7 +172,7 @@ class Trainer:
                 annot = data['annot'].to(self.device)
 
                 classification, regression, anchors = self.retinanet(input)
-                classification_loss, regression_loss = self.focal_loss(classification, regression, anchors, annot)
+                classification_loss, regression_loss = self.focal_loss.calcurate(classification, regression, anchors, annot)
 
                 
                 classification_loss = classification_loss.data().mean()
