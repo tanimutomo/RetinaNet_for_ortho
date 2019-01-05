@@ -193,7 +193,7 @@ class Trainer:
                 break
 
 
-    def evaluate(self, epoch_num, dataloader_val):
+    def evaluate(self, epoch_num, dataset_val):
         if self.dataset == 'coco':
 
             print('Evaluating dataset')
