@@ -172,14 +172,19 @@ class Trainer:
                 annot = data['annot'].to(self.device)
 
                 classification, regression, anchors = self.retinanet(input)
+                print("classification: ", classification.shape)
+                print("regression: ", regression.shape)
+                print("anchors: ", anchors.shape)
                 classification = classification.detach()
                 regression = regression.detach()
                 anchors = anchors.detach()
-                print('check1')
+
+                print("classification: ", classification.shape)
+                print("regression: ", regression.shape)
+                print("anchors: ", anchors.shape)
                 classification_loss, regression_loss = self.focal_loss.calcurate(classification, regression, anchors, annot)
 
                 
-                print('check2')
                 classification_loss = classification_loss.mean()
                 regression_loss = regression_loss.mean()
 
@@ -190,7 +195,6 @@ class Trainer:
 
                 loss.backward()
 
-                print('check3')
                 torch.nn.utils.clip_grad_norm_(self.retinanet.parameters(), 0.1)
 
                 self.optimizer.step()
@@ -199,7 +203,6 @@ class Trainer:
 
                 epoch_loss.append(float(loss))
 
-                print('check4')
                 torch.nn.utils.clip_grad_norm_(self.retinanet.parameters(), 0.1)
                 print('Epoch: {} | Iteration: {} | Classification loss: {:1.5f} | Regression loss: {:1.5f} | Running loss: {:1.5f}'.format(epoch_num, iter_num, float(classification_loss), float(regression_loss), np.mean(self.loss_hist)))
                 
