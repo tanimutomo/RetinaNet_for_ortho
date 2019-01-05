@@ -152,7 +152,7 @@ class Trainer:
 
 
 
-    def train(self, epoch_num, dataloaders):
+    def train(self, epoch_num, dataloader_train):
         epoch_loss = []
         for iter_num, data in enumerate(dataloader_train):
             try:
