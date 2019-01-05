@@ -27,7 +27,7 @@ class NMS:
 
         transformed_anchors_sqz = torch.squeeze(transformed_anchors, dim=0)
         scores = torch.squeeze(scores)
-        anchors_nms_idx, _ = self.calcurate(transformed_anchors_sqz, scores, 0.5)
+        anchors_nms_idx, _ = self.calcurate(transformed_anchors_sqz, scores)
 
         nms_scores, nms_class = classification[0, anchors_nms_idx, :].max(dim=1)
 
