@@ -96,7 +96,7 @@ class Trainer:
 
         if self.cml:
             self.experiment = Experiment(api_key="xK18bJy5xiPuPf9Dptr43ZuMk",
-                    project_name="RetinaNet_COCO", workspace="tanimutomo")
+                        project_name="retinanet-coco", workspace="tanimutomo")
         else:
             self.experiment = None
 
