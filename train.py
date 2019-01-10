@@ -194,7 +194,7 @@ class Trainer:
             self.retinanet.train()
             self.retinanet.freeze_bn()
 
-             = self.train(epoch_num, epoch_loss, dataloader_train)
+            epoch_loss = self.train(epoch_num, epoch_loss, dataloader_train)
 
             self.retinanet.eval()
 
