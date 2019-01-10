@@ -84,6 +84,8 @@ class Trainer:
         # regression_loss
         self.rgrs_loss_meter = AverageMeter()
 
+        self.set_comet_ml()
+
     
     def set_comet_ml(self):
         params = {
