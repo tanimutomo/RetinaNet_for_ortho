@@ -1,21 +1,21 @@
-import time
 import os
+import sys
+import pdb
+import time
 import copy
 import argparse
-import pdb
 import collections
-import sys
-
 import numpy as np
+from comet_ml import Experiment
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 from torch.autograd import Variable
-from torchvision import datasets, models, transforms
-import torchvision
 from torch.utils.data import Dataset, DataLoader
+import torchvision
+from torchvision import datasets, models, transforms
 
 from modules.anchors import Anchors
 from modules import losses
@@ -23,7 +23,7 @@ from modules.dataloader import CocoDataset, CSVDataset, collater, Resizer, Aspec
 from modules import coco_eval
 from modules import csv_eval
 from modules.nms_pytorch import NMS
-from modules.utils import BBoxTransform, ClipBoxes
+from modules.utils import BBoxTransform, ClipBoxes, AverageMeter
 
 import model
 
@@ -54,6 +54,12 @@ class Trainer:
         # Resnet depth, must be one of 18, 34, 50, 101, 152
         self.depth = 50
 
+        # batch_size
+        self.bs = 4
+
+        # learning rate
+        self.lr = 1e-5
+
         # Number of epochs
         self.epochs = 3
 
@@ -65,8 +71,39 @@ class Trainer:
 
         # module calcurating nms
         self.nms = NMS(BBoxTransform, ClipBoxes)
-        
+
+        # index of the saving model
+        self.save_name = 0
+
+        # use comet_ml
+        self.cml = True
+
+        # classification_loss
+        self.cls_loss_meter = AverageMeter()
+
+        # regression_loss
+        self.rgrs_loss_meter = AverageMeter()
+
     
+    def set_comet_ml(self):
+        params = {
+        'epochs': self.epochs,
+        'batch_size': self.bs,
+        'lr': self.lr,
+        'resnet_depth': self.depth,
+        'save_name': self.save_name,
+        }
+
+        if self.cml:
+            self.experiment = Experiment(api_key="xK18bJy5xiPuPf9Dptr43ZuMk",
+                    project_name="RetinaNet_COCO", workspace="tanimutomo")
+        else:
+            self.experiment = None
+
+        if self.cml:
+            self.experiment.log_multiple_params(params)
+
+
     def set_dataset(self):
         # Create the data loaders
         if self.dataset == 'coco':
@@ -119,7 +156,7 @@ class Trainer:
 
         self.retinanet.training = True
 
-        self.optimizer = optim.Adam(self.retinanet.parameters(), lr=1e-5)
+        self.optimizer = optim.Adam(self.retinanet.parameters(), lr=self.lr)
 
         # This lr_shceduler reduce the learning rate based on the models's validation loss
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, patience=3, verbose=True)
@@ -132,7 +169,7 @@ class Trainer:
     
     def iterate(self):
         dataset_train, dataset_val = self.set_dataset()
-        sampler = AspectRatioBasedSampler(dataset_train, batch_size=4, drop_last=False)
+        sampler = AspectRatioBasedSampler(dataset_train, batch_size=self.bs, drop_last=False)
         dataloader_train = DataLoader(dataset_train, num_workers=0, collate_fn=collater, batch_sampler=sampler)
 
         # if dataset_val is not None:
@@ -145,17 +182,26 @@ class Trainer:
         for epoch_num in range(self.epochs):
             epoch_loss = []
 
+            metrics = {
+                    'classification_loss': self.cls_loss_meter.avg,
+                    'regression_loss': self.rgrs_loss_meter.avg,
+                    'entire_loss': self.cls_loss_meter.avg + self.rgrs_loss_meter.avg
+                    }
+
+            if self.experiment is not None:
+                self.experiment.log_multiple_metrics(metrics, step=epoch_num)
+
             self.retinanet.train()
             self.retinanet.freeze_bn()
 
-            epoch_loss = self.train(epoch_num, epoch_loss, dataloader_train)
+             = self.train(epoch_num, epoch_loss, dataloader_train)
 
             self.retinanet.eval()
 
             self.evaluate(epoch_num, dataset_val)
 
             torch.save(self.retinanet.state_dict(), 
-                        os.path.join('./saved_models', 'model_final_{}.pth'.format(epoch_num)))
+                        os.path.join('./saved_models', 'model{}_final_{}.pth'.format(self.save_name, epoch_num)))
             # torch.save(self.retinanet.module, '{}_self.retinanet_{}.pt'.format(self.dataset, epoch_num))
 
             # self.retinanet.load_state_dict(torch.load("./saved_models/model_final_0.pth"))
@@ -178,6 +224,8 @@ class Trainer:
                 
                 classification_loss = classification_loss.mean()
                 regression_loss = regression_loss.mean()
+                self.cls_loss_meter.update(classification_loss)
+                self.rgrs_loss_meter.update(regression_loss)
 
                 loss = classification_loss + regression_loss
                 
