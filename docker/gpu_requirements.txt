@@ -1,6 +1,6 @@
 torch==0.4.1
 torchvision
-numpy
+numpy==1.16.0
 Cython
 cffi
 pandas
