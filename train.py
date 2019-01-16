@@ -76,7 +76,7 @@ class Trainer:
         self.save_name = 0
 
         # use comet_ml
-        self.cml = True
+        self.cml = False
 
         # classification_loss
         self.cls_loss_meter = AverageMeter()
