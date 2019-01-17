@@ -199,7 +199,7 @@ class Trainer:
                 self.experiment.log_multiple_metrics(metrics, step=epoch_num)
 
             self.retinanet.train()
-            self.retinanet.freeze_bn()
+            self.retinanet.module.attribute.freeze_bn()
 
             epoch_loss = self.train(epoch_num, epoch_loss, dataloader_train)
 
