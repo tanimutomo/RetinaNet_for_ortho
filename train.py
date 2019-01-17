@@ -154,6 +154,11 @@ class Trainer:
         else:
             raise ValueError('Unsupported model depth, must be one of 18, 34, 50, 101, 152')		
 
+        if torch.cuda.device_count() > 1:
+            print("Let's use", torch.cuda.device_count(), "GPUs!")
+            # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
+            retinanet = nn.DataParallel(retinanet)
+
         self.retinanet = retinanet.to(self.device)
 
         self.retinanet.training = True
@@ -172,7 +177,7 @@ class Trainer:
     def iterate(self):
         dataset_train, dataset_val = self.set_dataset()
         sampler = AspectRatioBasedSampler(dataset_train, batch_size=self.bs, drop_last=False)
-        dataloader_train = DataLoader(dataset_train, num_workers=2, collate_fn=collater, batch_sampler=sampler)
+        dataloader_train = DataLoader(dataset_train, num_workers=0, collate_fn=collater, batch_sampler=sampler)
 
         # if dataset_val is not None:
         #     sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
