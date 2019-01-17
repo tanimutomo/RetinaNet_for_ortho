@@ -55,7 +55,7 @@ class Trainer:
         self.depth = 50
 
         # batch_size
-        self.bs = 12
+        self.bs = 8
 
         # learning rate
         self.lr = 1e-5
