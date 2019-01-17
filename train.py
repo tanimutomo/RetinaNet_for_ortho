@@ -61,7 +61,7 @@ class Trainer:
         self.lr = 1e-5
 
         # Number of epochs
-        self.epochs = 3
+        self.epochs = 10
 
         # set device
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -76,7 +76,7 @@ class Trainer:
         self.save_name = 0
 
         # use comet_ml
-        self.cml = False
+        self.cml = True
 
         # classification_loss
         self.cls_loss_meter = AverageMeter()
