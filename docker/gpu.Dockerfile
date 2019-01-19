@@ -88,4 +88,4 @@ CMD CUDA_ARCH="-gencode arch=compute_30,code=sm_30 \
            -gencode arch=compute_61,code=sm_61" && \
     echo "Compiling nms kernels by nvcc..." && \
     /usr/local/cuda/bin/nvcc -c -o nms/src/cuda/nms_kernel.cu.o nms_kernel.cu -x cu -Xcompiler -fPIC $CUDA_ARCH && \
-    python nms/build.py
+    ${PYTHON} nms/build.py
