@@ -1,7 +1,7 @@
 docker_path: './docker'
 
 # Number of GPUs to use
-num_use_gpu: 4
+num_use_gpu: 1
 
 # gitURL and branch of the project
 git_url: 'https://github.com/tanimutomo/RetinaNet_for_ortho.git' # ex) 'https://github.com/username/pjname.git'
@@ -17,8 +17,8 @@ origin_data: '' # ex) '/home/username/Project/data/mnist_data'
 data_dir: '' # ex) 'data/'
 
 # If you want to fix server and GPU number you use, please specify them
-fix_server: 'diana' # ex) 'bacchus'
-fix_gpu: [0, 1, 2, 3] # ex) [0, 1]
+fix_server: 'chasca' # ex) 'bacchus'
+fix_gpu: [0] # ex) [0, 1]
 
 # ssh config path
 ssh_config_path: '~/.ssh/config' # ex) '~/.ssh/config'
