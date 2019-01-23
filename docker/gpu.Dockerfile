@@ -67,7 +67,7 @@ RUN OPENCV_VERSION="3.4.3" && \
         wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
         unzip ${OPENCV_VERSION}.zip -d . && \
         mkdir /tmp/opencv/opencv-${OPENCV_VERSION}/build && cd /tmp/opencv/opencv-${OPENCV_VERSION}/build/ && \
-        cmake -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D WITH_FFMPEG=ON -D WITH_TBB=ON  .. | tee /tmp/opencv_cmake.log && \
+        cmake -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D WITH_FFMPEG=ON -D WITH_TBB=ON -D OPENCV_BUILD_3RDPARTY_LIBS=ON .. | tee /tmp/opencv_cmake.log && \
         make -j "$(nproc)" | tee /tmp/opencv_build.log && \
         make install | tee /tmp/opencv_install.log
 # end install for opencv
