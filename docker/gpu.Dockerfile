@@ -67,7 +67,7 @@ RUN OPENCV_VERSION="3.4.3" && \
         wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
         unzip ${OPENCV_VERSION}.zip -d . && \
         mkdir /tmp/opencv/opencv-${OPENCV_VERSION}/build && cd /tmp/opencv/opencv-${OPENCV_VERSION}/build/ && \
-        cmake -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D WITH_FFMPEG=ON -D WITH_TBB=ON  .. | tee /tmp/opencv_cmake.log && \
+        cmake -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D WITH_FFMPEG=ON -D WITH_TBB=ON -D OPENCV_BUILD_3RDPARTY_LIBS=ON .. | tee /tmp/opencv_cmake.log && \
         make -j "$(nproc)" | tee /tmp/opencv_build.log && \
         make install | tee /tmp/opencv_install.log
 # end install for opencv
@@ -79,5 +79,24 @@ RUN ${PIP} install --trusted-host pypi.python.org -r gpu_requirements.txt
 
 RUN ${PIP} install --upgrade pycocotools
 
-# CMD cd ./lib && ./build.sh
+# Build NMS
+# CMD CUDA_ARCH="-gencode arch=compute_30,code=sm_30 \
+#            -gencode arch=compute_35,code=sm_35 \
+#            -gencode arch=compute_50,code=sm_50 \
+#            -gencode arch=compute_52,code=sm_52 \
+#            -gencode arch=compute_60,code=sm_60 \
+#            -gencode arch=compute_61,code=sm_61" && \
+#     echo "Compiling nms kernels by nvcc..." && \
+#     /usr/local/cuda/bin/nvcc -c -o nms/src/cuda/nms_kernel.cu.o nms_kernel.cu -x cu -Xcompiler -fPIC $CUDA_ARCH && \
+#     ${PYTHON} nms/build.py
 
+CMD CUDA_ARCH="-gencode arch=compute_30,code=sm_30 \
+           -gencode arch=compute_35,code=sm_35 \
+           -gencode arch=compute_50,code=sm_50 \
+           -gencode arch=compute_52,code=sm_52 \
+           -gencode arch=compute_60,code=sm_60 \
+           -gencode arch=compute_61,code=sm_61" && \
+    echo "Compiling nms kernels by nvcc..." && \
+    /usr/local/cuda/bin/nvcc -c -o ./lib/nms/src/cuda/nms_kernel.cu.o \
+        ./lib/nms/src/cuda/nms_kernel.cu -x cu -Xcompiler -fPIC $CUDA_ARCH && \
+    python ./lib/nms/build.py

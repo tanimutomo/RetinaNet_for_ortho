@@ -55,7 +55,7 @@ class Trainer:
         self.depth = 50
 
         # batch_size
-        self.bs = 4
+        self.bs = 8
 
         # learning rate
         self.lr = 1e-5
@@ -73,7 +73,7 @@ class Trainer:
         self.nms = NMS(BBoxTransform, ClipBoxes)
 
         # index of the saving model
-        self.save_name = 0
+        self.save_name = 2
 
         # use comet_ml
         self.cml = True
@@ -160,9 +160,7 @@ class Trainer:
             retinanet = nn.DataParallel(retinanet)
 
         self.retinanet = retinanet.to(self.device)
-
         self.retinanet.training = True
-
         self.optimizer = optim.Adam(self.retinanet.parameters(), lr=self.lr)
 
         # This lr_shceduler reduce the learning rate based on the models's validation loss

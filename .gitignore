@@ -118,3 +118,4 @@ saved_models/
 *.pth
 *.gitkeep
 
+lib/nms/src/cuda/nms_kernel.cu.o
