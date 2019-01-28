@@ -279,3 +279,4 @@ class Trainer:
 if __name__ == '__main__':
     trainer = Trainer()
     trainer.iterate()
+    print("END TRAINING")
