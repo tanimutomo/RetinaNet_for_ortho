@@ -61,7 +61,7 @@ def main(args=None):
     # adjust_box = BBoxTransform()
     # clip_box = ClipBoxes()
 
-    retinanet = model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
+    retinanet = resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
     retinanet.load_state_dict(torch.load(params['model']))
     retinanet.eval()
 
