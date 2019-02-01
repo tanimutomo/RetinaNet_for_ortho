@@ -217,6 +217,7 @@ class CSVDataset(Dataset):
         sample['position'] = position
         sample['div_num'] = div_num
 
+        print(sample)
         return sample
 
     def get_img_position(self, file_path):
@@ -225,13 +226,11 @@ class CSVDataset(Dataset):
         index = int(filename[0])
         pos = [int(s) for s in filename[1].split('x')]
         div_num = [int(s) for s in filename[2].split('x')]
-        print(index, pos, div_num)
 
         return index, pos, div_num
 
     def load_image(self, image_index):
         file_path = self.image_names[image_index]
-        print(file_path)
         img = skimage.io.imread(file_path)
 
         if len(img.shape) == 2:
