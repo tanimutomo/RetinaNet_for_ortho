@@ -15,7 +15,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, models, transforms
 
 from modules.dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer
-from model import resnet
+from model import resnet50
 from modules.nms_pytorch import NMS
 from modules.anchors import Anchors
 from modules.utils import BBoxTransform, ClipBoxes
