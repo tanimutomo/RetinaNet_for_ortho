@@ -213,9 +213,9 @@ class CSVDataset(Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        params['p_idx'] = p_idx
-        params['position'] = position
-        params['div_num'] = div_num
+        sample['p_idx'] = p_idx
+        sample['position'] = position
+        sample['div_num'] = div_num
 
         return sample
 
