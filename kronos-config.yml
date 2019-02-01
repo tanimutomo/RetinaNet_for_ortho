@@ -5,7 +5,7 @@ num_use_gpu: 1
 
 # gitURL and branch of the project
 git_url: 'https://github.com/tanimutomo/RetinaNet_for_ortho.git' # ex) 'https://github.com/username/pjname.git'
-git_branch: 'pretrained_model_load' # ex) 'master'
+git_branch: 'visualize_exp' # ex) 'master'
 
 # project directory path in remote server
 pj_root: '/home/tanimu/Project' # ex) '/home/username/Project/pjname'
