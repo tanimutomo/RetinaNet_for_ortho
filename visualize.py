@@ -43,8 +43,10 @@ def main(args=None):
             'coco_path': '',
             'csv_classes': './csv_data/0130/annotations/class_id.csv',
             'csv_val': './csv_data/0130/annotations/annotation.csv',
-            'model': './models/model_final.pth'
+            'model': './models/model_final.pth',
+            'num_class': 3
             }
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if params['dataset'] == 'coco':
         dataset_val = CocoDataset(params['coco_path'], set_name='val2017', transform=transforms.Compose([Normalizer(), Resizer()]))
@@ -61,14 +63,14 @@ def main(args=None):
     # adjust_box = BBoxTransform()
     # clip_box = ClipBoxes()
 
-    retinanet = resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
+    retinanet = resnet50(num_classes=params['num_class'], pretrained=True)
     retinanet.load_state_dict(torch.load(params['model']))
     retinanet.eval()
 
     use_gpu = True
 
     if use_gpu:
-        retinanet = retinanet.cuda()
+        retinanet = retinanet.to(device)
 
     unnormalize = UnNormalizer()
 
@@ -84,7 +86,7 @@ def main(args=None):
     images_list = []
     for idx, data in enumerate(dataloader_val):
         st = time.time()
-        # scores, classification, transformed_anchors = retinanet(data['img'].cuda().float())
+        # scores, classification, transformed_anchors = retinanet(data['img'].to(device).float())
         input = data['img'].to(device).float()
         regression, classification, anchors = retinanet(input)
         scores, labels, boxes = nms.calc_from_retinanet_output(
