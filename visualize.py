@@ -17,6 +17,8 @@ from torchvision import datasets, models, transforms
 from .modules.dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer
 from .model import resnet
 from .modules.nms_pytorch import NMS
+from .modules.anchors import Anchors
+from .modules.utils import BBoxTransform, ClipBoxes
 
 
 assert torch.__version__.split('.')[1] == '4'
@@ -25,88 +27,120 @@ print('CUDA available: {}'.format(torch.cuda.is_available()))
 
 
 def main(args=None):
-	# parser = argparse.ArgumentParser(description='Simple training script for training a RetinaNet network.')
+    # parser = argparse.ArgumentParser(description='Simple training script for training a RetinaNet network.')
 
-	# parser.add_argument('--dataset', help='Dataset type, must be one of csv or coco.', default='coco')
-	# parser.add_argument('--coco_path', help='Path to COCO directory', default='./data')
-	# parser.add_argument('--csv_classes', help='Path to file containing class list (see readme)')
-	# parser.add_argument('--csv_val', help='Path to file containing validation annotations (optional, see readme)')
+    # parser.add_argument('--dataset', help='Dataset type, must be one of csv or coco.', default='coco')
+    # parser.add_argument('--coco_path', help='Path to COCO directory', default='./data')
+    # parser.add_argument('--csv_classes', help='Path to file containing class list (see readme)')
+    # parser.add_argument('--csv_val', help='Path to file containing validation annotations (optional, see readme)')
 
-	# parser.add_argument('--model', help='Path to model (.pt) file.', default='./coco_resnet_50_map_0_335.pt')
+    # parser.add_argument('--model', help='Path to model (.pt) file.', default='./coco_resnet_50_map_0_335.pt')
 
-	# parser = parser.parse_args(args)
+    # parser = parser.parse_args(args)
     params = {
             'dataset': 'coco',
             'coco_path': './data',
-            'csv_classes': ,
+            'csv_classes': '',
             'csv_val': '/path/to/val_annot',
-            'model': 'path/to/model_param',
+            'model': 'path/to/model_param'
             }
 
-	if params['dataset'] == 'coco':
-		dataset_val = CocoDataset(params['coco_path'], set_name='val2017', transform=transforms.Compose([Normalizer(), Resizer()]))
-	elif params['dataset'] == 'csv':
-		dataset_val = CSVDataset(train_file=params['csv_train'], class_list=params['csv_classes'], transform=transforms.Compose([Normalizer(), Resizer()]))
-	else:
-		raise ValueError('Dataset type not understood (must be csv or coco), exiting.')
+    if params['dataset'] == 'coco':
+        dataset_val = CocoDataset(params['coco_path'], set_name='val2017', transform=transforms.Compose([Normalizer(), Resizer()]))
+    elif params['dataset'] == 'csv':
+        dataset_val = CSVDataset(train_file=params['csv_train'], class_list=params['csv_classes'], transform=transforms.Compose([Normalizer(), Resizer()]))
+    else:
+        raise ValueError('Dataset type not understood (must be csv or coco), exiting.')
 
-	sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
-	dataloader_val = DataLoader(dataset_val, num_workers=1, collate_fn=collater, batch_sampler=sampler_val)
+    sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
+    dataloader_val = DataLoader(dataset_val, num_workers=1, collate_fn=collater, batch_sampler=sampler_val)
 
     nms = NMS(BBoxTransform, ClipBoxes)
+    # get_anchors = Anchors()
+    # adjust_box = BBoxTransform()
+    # clip_box = ClipBoxes()
+
     retinanet = model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
     retinanet.load_state_dict(torch.load('path/to/model_state_dict'))
     retinanet.eval()
 
-	use_gpu = True
+    use_gpu = True
 
-	if use_gpu:
-		retinanet = retinanet.cuda()
+    if use_gpu:
+        retinanet = retinanet.cuda()
 
-	unnormalize = UnNormalizer()
+    unnormalize = UnNormalizer()
 
-	def draw_caption(image, box, caption):
+    def draw_caption(image, box, caption):
+        b = np.array(box).astype(int)
+        cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
+        cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
 
-		b = np.array(box).astype(int)
-		cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
-		cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
 
-	for idx, data in enumerate(dataloader_val):
+    scores_list = []
+    labels_list = []
+    boxes_list = []
+    images_list = []
+    for idx, data in enumerate(dataloader_val):
+        st = time.time()
+        # scores, classification, transformed_anchors = retinanet(data['img'].cuda().float())
+        input = data['img'].to(device).float()
+        regression, classification, anchors = retinanet(input)
+        scores, labels, boxes = nms.calc_from_retinanet_output(
+                input, regression, classification, anchors)
 
-		with torch.no_grad():
-			st = time.time()
-			# scores, classification, transformed_anchors = retinanet(data['img'].cuda().float())
-            regression, classification, anchors = retinanet(data['img'].cuda().float())
-            scores, labels, boxes = nms.calc_from_retinanet_output(
-                    data['img'].cuda().float(), regression, classification, anchors)
+        # anchors = get_anchors(input)
+        # adjusted_boxes = adjust_box(anchors, boxes)
+        # adjusted_boxes = clip_box(adjusted_boxes, input)
 
-			print('Elapsed time: {}'.format(time.time()-st))
-			idxs = np.where(scores>0.5)
-			img = np.array(255 * unnormalize(data['img'][0, :, :, :])).copy()
+        scores_list.append(scores)
+        labels_list.append(labels)
+        boxes_list.append(boxes)
 
-			img[img<0] = 0
-			img[img>255] = 255
+        # image denomalization
+        img = np.array(255 * unnormalize(data['img'][0, :, :, :])).copy()
+        img[img<0] = 0
+        img[img>255] = 255
+        img = np.transpose(img, (1, 2, 0))
+        img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
+        images_list.append(img)
 
-			img = np.transpose(img, (1, 2, 0))
 
-			img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
+    # if scores and labels is torch tensor
+    scores_list = torch.cat(scores_list, 0)
+    labels_list = torch.cat(labels_list, 0)
+    boxes_list = torch.cat(boxes_list, 0)
 
-			for j in range(idxs[0].shape[0]):
-				bbox = transformed_anchors[idxs[0][j], :]
-				x1 = int(bbox[0])
-				y1 = int(bbox[1])
-				x2 = int(bbox[2])
-				y2 = int(bbox[3])
-				label_name = dataset_val.labels[int(classification[idxs[0][j]])]
-				draw_caption(img, (x1, y1, x2, y2), label_name)
+    # ----------------------------------------
+    # apply nmf calcuraiton to entire bboxes
+    entire_scores, entire_labels, entire_boxes = entire_nmf(scores_list, labels_list, boxes_list)
+    # ----------------------------------------
 
-				cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
-				print(label_name)
+    # ----------------------------------------
+    # unite image parts
+    ortho_img = unite_images(images_list)
+    # ----------------------------------------
 
-			cv2.imshow('img', img)
-			cv2.waitKey(0)
+
+    print('Elapsed time: {}'.format(time.time()-st))
+
+    idxs = np.where(entire_scores>0.5)
+    for j in range(idxs[0].shape[0]):
+        bbox = boxes[idxs[0][j], :]
+        x1 = int(bbox[0])
+        y1 = int(bbox[1])
+        x2 = int(bbox[2])
+        y2 = int(bbox[3])
+        label_name = dataset_val.labels[int(entire_labels[idxs[0][j]])]
+        draw_caption(img, (x1, y1, x2, y2), label_name)
+
+        cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
+        print(label_name)
+
+    cv2.imshow('img', img)
+    cv2.waitKey(0)
 
 
 
 if __name__ == '__main__':
- main()
+    main()
