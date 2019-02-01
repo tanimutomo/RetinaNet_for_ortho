@@ -16,8 +16,6 @@ class NMS:
         scores_over_thresh = (scores>0.05)[0, :, 0]
         # scores_over_thresh = scores
 
-        # print('1 ', scores_over_thresh.shape)
-        # print('2 ', scores_over_thresh.sum())
         if scores_over_thresh.sum() == 0:
             # no boxes to NMS, just return
             return [torch.zeros(0), torch.zeros(0), torch.zeros(0, 4)]
@@ -36,8 +34,14 @@ class NMS:
 
         return [nms_scores, nms_class, transformed_anchors[0, anchors_nms_idx, :]]
 
-    def entire_nms(self, inputs, regression, classification, anchors):
-        pass
+
+    def entire_nms(self, scores, labels, boxes):
+        selected_idx = self.calcurate(boxes, scores)[0]
+        scores = scores[selected_idx]
+        labels = labels[selected_idx]
+        boxes = boxes[selected_idx]
+
+        return scores, labels, boxes
 
 
     def calcurate(self, boxes, scores, overlap=0.5, top_k=200):

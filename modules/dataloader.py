@@ -209,28 +209,27 @@ class CSVDataset(Dataset):
         sample = {
                 'img': img, 
                 'annot': annot,
-                'p_idx': p_idx,
-                'position': position,
-                'div_num': div_num
                 }
         if self.transform:
             sample = self.transform(sample)
 
+        sample['p_idx'] = p_idx
+        sample['position'] = position
+        sample['div_num'] = div_num
+
         return sample
 
-    def get_img_position(self, filepath):
+    def get_img_position(self, file_path):
         # path example: './csv_data/0130/images/2_1x2_28x38.png'
         filename = file_path.split('/')[-1].split('.')[0].split('_')
         index = int(filename[0])
         pos = [int(s) for s in filename[1].split('x')]
         div_num = [int(s) for s in filename[2].split('x')]
-        print(index, pos, div_num)
 
         return index, pos, div_num
 
     def load_image(self, image_index):
         file_path = self.image_names[image_index]
-        print(file_path)
         img = skimage.io.imread(file_path)
 
         if len(img.shape) == 2:
@@ -324,6 +323,9 @@ def collater(data):
     imgs = [s['img'] for s in data]
     annots = [s['annot'] for s in data]
     scales = [s['scale'] for s in data]
+    p_idxs = [s['p_idx'] for s in data]
+    positions = [s['position'] for s in data]
+    div_nums = [s['div_num'] for s in data]
         
     widths = [int(s.shape[0]) for s in imgs]
     heights = [int(s.shape[1]) for s in imgs]
@@ -355,7 +357,8 @@ def collater(data):
 
     padded_imgs = padded_imgs.permute(0, 3, 1, 2)
 
-    return {'img': padded_imgs, 'annot': annot_padded, 'scale': scales}
+    return {'img': padded_imgs, 'annot': annot_padded, 'scale': scales, 
+            'p_idx': p_idxs, 'position': positions, 'div_num': div_nums}
 
 class Resizer(object):
     """Convert ndarrays in sample to Tensors."""
