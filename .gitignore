@@ -119,3 +119,5 @@ saved_models/
 *.gitkeep
 
 lib/nms/src/cuda/nms_kernel.cu.o
+csv_data/
+models/
