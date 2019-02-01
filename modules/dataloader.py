@@ -218,7 +218,7 @@ class CSVDataset(Dataset):
 
         return sample
 
-    def get_img_position(self, filepath):
+    def get_img_position(self, file_path):
         # path example: './csv_data/0130/images/2_1x2_28x38.png'
         filename = file_path.split('/')[-1].split('.')[0].split('_')
         index = int(filename[0])
