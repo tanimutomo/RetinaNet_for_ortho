@@ -84,65 +84,66 @@ def main(args=None):
     labels_list = []
     boxes_list = []
     images_list = []
-    for idx, data in enumerate(dataloader_val):
-        st = time.time()
-        # scores, classification, transformed_anchors = retinanet(data['img'].to(device).float())
-        input = data['img'].to(device).float()
-        regression, classification, anchors = retinanet(input)
-        scores, labels, boxes = nms.calc_from_retinanet_output(
-                input, regression, classification, anchors)
+    with torch.no_grad():
+        for idx, data in enumerate(dataloader_val):
+            st = time.time()
+            # scores, classification, transformed_anchors = retinanet(data['img'].to(device).float())
+            input = data['img'].to(device).float()
+            regression, classification, anchors = retinanet(input)
+            scores, labels, boxes = nms.calc_from_retinanet_output(
+                    input, regression, classification, anchors)
 
-        # anchors = get_anchors(input)
-        # adjusted_boxes = adjust_box(anchors, boxes)
-        # adjusted_boxes = clip_box(adjusted_boxes, input)
-        adjusted_boxes = adjust_for_ortho(boxes, data['position'], data['div_num'])
+            # anchors = get_anchors(input)
+            # adjusted_boxes = adjust_box(anchors, boxes)
+            # adjusted_boxes = clip_box(adjusted_boxes, input)
+            adjusted_boxes = adjust_for_ortho(boxes, data['position'], data['div_num'])
 
-        scores_list.append(scores)
-        labels_list.append(labels)
-        boxes_list.append(boxes)
+            scores_list.append(scores)
+            labels_list.append(labels)
+            boxes_list.append(boxes)
 
-        # image denomalization
-        img = np.array(255 * unnormalize(data['img'][0, :, :, :])).copy()
-        img[img<0] = 0
-        img[img>255] = 255
-        img = np.transpose(img, (1, 2, 0))
-        img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
-        images_list.append(img)
-
-
-    # if scores and labels is torch tensor
-    scores_list = torch.cat(scores_list, 0)
-    labels_list = torch.cat(labels_list, 0)
-    boxes_list = torch.cat(boxes_list, 0)
-
-    # ----------------------------------------
-    # apply nmf calcuraiton to entire bboxes
-    entire_scores, entire_labels, entire_boxes = entire_nmf(scores_list, labels_list, boxes_list)
-    # ----------------------------------------
-
-    # ----------------------------------------
-    # unite image parts
-    ortho_img = unite_images(images_list)
-    # ----------------------------------------
+            # image denomalization
+            img = np.array(255 * unnormalize(data['img'][0, :, :, :])).copy()
+            img[img<0] = 0
+            img[img>255] = 255
+            img = np.transpose(img, (1, 2, 0))
+            img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
+            images_list.append(img)
 
 
-    print('Elapsed time: {}'.format(time.time()-st))
+        # if scores and labels is torch tensor
+        scores_list = torch.cat(scores_list, 0)
+        labels_list = torch.cat(labels_list, 0)
+        boxes_list = torch.cat(boxes_list, 0)
 
-    idxs = np.where(entire_scores>0.5)
-    for j in range(idxs[0].shape[0]):
-        bbox = boxes[idxs[0][j], :]
-        x1 = int(bbox[0])
-        y1 = int(bbox[1])
-        x2 = int(bbox[2])
-        y2 = int(bbox[3])
-        label_name = dataset_val.labels[int(entire_labels[idxs[0][j]])]
-        draw_caption(img, (x1, y1, x2, y2), label_name)
+        # ----------------------------------------
+        # apply nmf calcuraiton to entire bboxes
+        entire_scores, entire_labels, entire_boxes = entire_nmf(scores_list, labels_list, boxes_list)
+        # ----------------------------------------
 
-        cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
-        print(label_name)
+        # ----------------------------------------
+        # unite image parts
+        ortho_img = unite_images(images_list)
+        # ----------------------------------------
 
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
+
+        print('Elapsed time: {}'.format(time.time()-st))
+
+        idxs = np.where(entire_scores>0.5)
+        for j in range(idxs[0].shape[0]):
+            bbox = boxes[idxs[0][j], :]
+            x1 = int(bbox[0])
+            y1 = int(bbox[1])
+            x2 = int(bbox[2])
+            y2 = int(bbox[3])
+            label_name = dataset_val.labels[int(entire_labels[idxs[0][j]])]
+            draw_caption(img, (x1, y1, x2, y2), label_name)
+
+            cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
+            print(label_name)
+
+        cv2.imshow('img', img)
+        cv2.waitKey(0)
 
 
 
