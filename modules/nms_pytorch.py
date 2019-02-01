@@ -36,6 +36,9 @@ class NMS:
 
         return [nms_scores, nms_class, transformed_anchors[0, anchors_nms_idx, :]]
 
+    def entire_nms(self, inputs, regression, classification, anchors):
+        pass
+
 
     def calcurate(self, boxes, scores, overlap=0.5, top_k=200):
         """Apply non-maximum suppression at test time to avoid detecting too many
