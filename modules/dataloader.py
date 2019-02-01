@@ -209,12 +209,13 @@ class CSVDataset(Dataset):
         sample = {
                 'img': img, 
                 'annot': annot,
-                'p_idx': p_idx,
-                'position': position,
-                'div_num': div_num
                 }
         if self.transform:
             sample = self.transform(sample)
+
+        params['p_idx'] = p_idx
+        params['position'] = position
+        params['div_num'] = div_num
 
         return sample
 
