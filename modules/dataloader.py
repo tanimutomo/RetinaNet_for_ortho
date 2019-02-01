@@ -203,21 +203,40 @@ class CSVDataset(Dataset):
 
     def __getitem__(self, idx):
 
-        img = self.load_image(idx)
+        img, file_path = self.load_image(idx)
+        p_idx, position, div_num = self.get_img_position(file_path)
         annot = self.load_annotations(idx)
-        sample = {'img': img, 'annot': annot}
+        sample = {
+                'img': img, 
+                'annot': annot,
+                'p_idx': p_idx,
+                'position': position,
+                'div_num': div_num
+                }
         if self.transform:
             sample = self.transform(sample)
 
         return sample
 
+    def get_img_position(self, filepath):
+        # path example: './csv_data/0130/images/2_1x2_28x38.png'
+        filename = file_path.split('/')[-1].split('.')[0].split('_')
+        index = int(filename[0])
+        pos = [int(s) for s in filename[1].split('x')]
+        div_num = [int(s) for s in filename[2].split('x')]
+        print(index, pos, div_num)
+
+        return index, pos, div_num
+
     def load_image(self, image_index):
-        img = skimage.io.imread(self.image_names[image_index])
+        file_path = self.image_names[image_index]
+        print(file_path)
+        img = skimage.io.imread(file_path)
 
         if len(img.shape) == 2:
             img = skimage.color.gray2rgb(img)
 
-        return img.astype(np.float32)/255.0
+        return img.astype(np.float32)/255.0, file_path
 
     def load_annotations(self, image_index):
         # get ground truth annotations
