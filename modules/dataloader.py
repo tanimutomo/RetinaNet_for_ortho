@@ -217,7 +217,6 @@ class CSVDataset(Dataset):
         sample['position'] = position
         sample['div_num'] = div_num
 
-        print(sample)
         return sample
 
     def get_img_position(self, file_path):
@@ -324,6 +323,9 @@ def collater(data):
     imgs = [s['img'] for s in data]
     annots = [s['annot'] for s in data]
     scales = [s['scale'] for s in data]
+    p_idxs = [s['p_idx'] for s in data]
+    positions = [s['position'] for s in data]
+    div_nums = [s['div_num'] for s in data]
         
     widths = [int(s.shape[0]) for s in imgs]
     heights = [int(s.shape[1]) for s in imgs]
@@ -355,7 +357,8 @@ def collater(data):
 
     padded_imgs = padded_imgs.permute(0, 3, 1, 2)
 
-    return {'img': padded_imgs, 'annot': annot_padded, 'scale': scales}
+    return {'img': padded_imgs, 'annot': annot_padded, 'scale': scales, 
+            'p_idx': p_idxs, 'position': positions, 'div_num': div_nums}
 
 class Resizer(object):
     """Convert ndarrays in sample to Tensors."""

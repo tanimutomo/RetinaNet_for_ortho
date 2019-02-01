@@ -59,18 +59,12 @@ def main(args=None):
     dataloader_val = DataLoader(dataset_val, num_workers=1, collate_fn=collater, batch_sampler=sampler_val)
 
     nms = NMS(BBoxTransform, ClipBoxes)
-    # get_anchors = Anchors()
-    # adjust_box = BBoxTransform()
-    # clip_box = ClipBoxes()
 
     retinanet = resnet50(num_classes=params['num_class'], pretrained=True)
     retinanet.load_state_dict(torch.load(params['model']))
     retinanet.eval()
 
-    use_gpu = True
-
-    if use_gpu:
-        retinanet = retinanet.to(device)
+    retinanet = retinanet.to(device)
 
     unnormalize = UnNormalizer()
 
@@ -84,6 +78,9 @@ def main(args=None):
     labels_list = []
     boxes_list = []
     images_list = []
+    p_idxs = []
+    positions = []
+    div_nums = []
     with torch.no_grad():
         for idx, data in enumerate(dataloader_val):
             st = time.time()
@@ -93,14 +90,18 @@ def main(args=None):
             scores, labels, boxes = nms.calc_from_retinanet_output(
                     input, regression, classification, anchors)
 
-            # anchors = get_anchors(input)
-            # adjusted_boxes = adjust_box(anchors, boxes)
-            # adjusted_boxes = clip_box(adjusted_boxes, input)
-            adjusted_boxes = adjust_for_ortho(boxes, data['position'], data['div_num'])
+            data['p_idx'] = data['p_idx'][0]
+            data['position'] = data['position'][0]
+            data['div_num'] = data['div_num'][0]
+            if boxes.shape[0] != 0:
+                adjusted_boxes = adjust_for_ortho(boxes, data['position'], data['div_num'])
+                scores_list.append(scores.to(torch.float).to(device))
+                labels_list.append(labels.to(torch.long).to(device))
+                boxes_list.append(adjusted_boxes.to(torch.float).to(device))
 
-            scores_list.append(scores)
-            labels_list.append(labels)
-            boxes_list.append(boxes)
+            p_idxs.append(data['p_idx'])
+            positions.append(data['position'])
+            div_nums.append(data['div_num'])
 
             # image denomalization
             img = np.array(255 * unnormalize(data['img'][0, :, :, :])).copy()
@@ -112,23 +113,23 @@ def main(args=None):
 
 
         # if scores and labels is torch tensor
-        scores_list = torch.cat(scores_list, 0)
-        labels_list = torch.cat(labels_list, 0)
-        boxes_list = torch.cat(boxes_list, 0)
+        scores_list = torch.cat(tuple(scores_list), 0).cpu()
+        labels_list = torch.cat(tuple(labels_list), 0).cpu()
+        boxes_list = torch.cat(tuple(boxes_list), 0).cpu()
 
         # ----------------------------------------
-        # apply nmf calcuraiton to entire bboxes
-        entire_scores, entire_labels, entire_boxes = entire_nmf(scores_list, labels_list, boxes_list)
+        # apply nms calcuraiton to entire bboxes
+        entire_scores, entire_labels, entire_boxes = nms.entire_nms(scores_list, labels_list, boxes_list)
         # ----------------------------------------
 
         # ----------------------------------------
         # unite image parts
-        ortho_img = unite_images(images_list)
+        ortho_img = unite_images(images_list, p_idxs, positions, div_nums)
         # ----------------------------------------
-
 
         print('Elapsed time: {}'.format(time.time()-st))
 
+        print(boxes.shape)
         idxs = np.where(entire_scores>0.5)
         for j in range(idxs[0].shape[0]):
             bbox = boxes[idxs[0][j], :]
@@ -140,7 +141,6 @@ def main(args=None):
             draw_caption(img, (x1, y1, x2, y2), label_name)
 
             cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
-            print(label_name)
 
         cv2.imshow('img', img)
         cv2.waitKey(0)
