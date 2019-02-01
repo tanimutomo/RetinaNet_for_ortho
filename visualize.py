@@ -14,11 +14,12 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, models, transforms
 
-from .modules.dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer
-from .model import resnet
-from .modules.nms_pytorch import NMS
-from .modules.anchors import Anchors
-from .modules.utils import BBoxTransform, ClipBoxes
+from modules.dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer
+from model import resnet
+from modules.nms_pytorch import NMS
+from modules.anchors import Anchors
+from modules.utils import BBoxTransform, ClipBoxes
+from modules.ortho_util import adjust_for_ortho, unite_images
 
 
 assert torch.__version__.split('.')[1] == '4'
@@ -38,17 +39,17 @@ def main(args=None):
 
     # parser = parser.parse_args(args)
     params = {
-            'dataset': 'coco',
-            'coco_path': './data',
-            'csv_classes': '',
-            'csv_val': '/path/to/val_annot',
-            'model': 'path/to/model_param'
+            'dataset': 'csv',
+            'coco_path': '',
+            'csv_classes': './csv_data/0130/annotations/class_id.csv',
+            'csv_val': './csv_data/0130/annotations/annotation.csv',
+            'model': './models/model_final.pth'
             }
 
     if params['dataset'] == 'coco':
         dataset_val = CocoDataset(params['coco_path'], set_name='val2017', transform=transforms.Compose([Normalizer(), Resizer()]))
     elif params['dataset'] == 'csv':
-        dataset_val = CSVDataset(train_file=params['csv_train'], class_list=params['csv_classes'], transform=transforms.Compose([Normalizer(), Resizer()]))
+        dataset_val = CSVDataset(train_file=params['csv_val'], class_list=params['csv_classes'], transform=transforms.Compose([Normalizer(), Resizer()]))
     else:
         raise ValueError('Dataset type not understood (must be csv or coco), exiting.')
 
@@ -61,7 +62,7 @@ def main(args=None):
     # clip_box = ClipBoxes()
 
     retinanet = model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
-    retinanet.load_state_dict(torch.load('path/to/model_state_dict'))
+    retinanet.load_state_dict(torch.load(params['model']))
     retinanet.eval()
 
     use_gpu = True
@@ -92,6 +93,7 @@ def main(args=None):
         # anchors = get_anchors(input)
         # adjusted_boxes = adjust_box(anchors, boxes)
         # adjusted_boxes = clip_box(adjusted_boxes, input)
+        adjusted_boxes = adjust_for_ortho(boxes, data['position'], data['div_num'])
 
         scores_list.append(scores)
         labels_list.append(labels)
